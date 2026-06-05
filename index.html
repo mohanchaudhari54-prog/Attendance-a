@@ -1,42 +1,76 @@
 <!DOCTYPE html>
-<html lang="mr">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Employee Attendance</title>
+<title>Attendance System</title>
+
 <link rel="stylesheet" href="style.css">
+
+<style>
+body{
+font-family:Arial,sans-serif;
+background:#f4f4f4;
+text-align:center;
+padding:20px;
+}
+
+.container{
+max-width:400px;
+margin:auto;
+background:white;
+padding:20px;
+border-radius:10px;
+box-shadow:0 0 10px rgba(0,0,0,0.1);
+}
+
+input,button{
+width:100%;
+padding:12px;
+margin-top:10px;
+box-sizing:border-box;
+}
+
+img{
+width:100%;
+margin-top:15px;
+border-radius:10px;
+}
+</style>
+
 </head>
 <body>
 
 <div class="container">
+
 <h1>Attendance System</h1>
 
-<input type="text" id="empName" placeholder="Employee Name">
+<input
+type="text"
+id="empName"
+placeholder="Employee Name">
 
 <button onclick="getLocation()">
 Punch In
 </button>
 
 <p id="status"></p>
-</div>
 
-<script src="script.js"></script>
+<hr>
 
 <h3>Selfie Capture</h3>
 
-<video id="video" width="300" height="220" autoplay></video>
+<input
+type="file"
+accept="image/*"
+capture="user"
+id="selfie">
 
-<br><br>
+<img id="photo">
 
-<button onclick="capturePhoto()">
-Take Selfie
-</button>
+</div>
 
-<br><br>
-
-<canvas id="canvas" width="300" height="220" style="display:none;"></canvas>
-
-<img id="photo" width="300">
+<script src="script.js"></script>
 
 </body>
 </html>
