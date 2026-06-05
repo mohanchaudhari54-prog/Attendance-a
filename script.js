@@ -4,34 +4,56 @@ function getLocation() {
 
 if (navigator.geolocation) {
 
-navigator.geolocation.getCurrentPosition(
+    navigator.geolocation.getCurrentPosition(
 
-function(position){
+        function(position){
 
-let lat = position.coords.latitude;
-let lon = position.coords.longitude;
+            let lat = position.coords.latitude;
+            let lon = position.coords.longitude;
 
-document.getElementById("status").innerHTML =
-"✅ Attendance Marked<br><br>" +
-"Latitude : " + lat +
-"<br>" +
-"Longitude : " + lon;
+            document.getElementById("status").innerHTML =
+            "✅ Attendance Marked<br><br>" +
+            "Latitude : " + lat +
+            "<br>" +
+            "Longitude : " + lon;
 
-},
+            // Save to Google Sheet
 
-function(error){
+            const data = {
+                name: document.getElementById("empName").value,
+                date: new Date().toLocaleDateString(),
+                time: new Date().toLocaleTimeString(),
+                latitude: lat,
+                longitude: lon
+            };
 
-document.getElementById("status").innerHTML =
-"❌ Location Permission Denied";
+            fetch("https://script.google.com/macros/s/AKfycbwxMYR8bM8gdY4SkN5e9xscmz7ensP__x_7taTFvc7R55kq-OCU6AOqorYPxQ4K8-POUg/exec", {
+                method: "POST",
+                body: JSON.stringify(data)
+            })
+            .then(response => response.text())
+            .then(result => {
+                console.log("Saved:", result);
+            })
+            .catch(error => {
+                console.log("Error:", error);
+            });
 
-}
+        },
 
-);
+        function(error){
+
+            document.getElementById("status").innerHTML =
+            "❌ Location Permission Denied";
+
+        }
+
+    );
 
 } else {
 
-document.getElementById("status").innerHTML =
-"❌ Geolocation Not Supported";
+    document.getElementById("status").innerHTML =
+    "❌ Geolocation Not Supported";
 
 }
 
