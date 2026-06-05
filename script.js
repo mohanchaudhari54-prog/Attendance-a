@@ -42,21 +42,16 @@ document.getElementById("status").innerHTML =
 
 document.getElementById("selfie").addEventListener("change", function(event) {
 
+    alert("File Selected");
+
     const file = event.target.files[0];
 
     if (!file) return;
 
-    const reader = new FileReader();
+    const photo = document.getElementById("photo");
 
-    reader.onload = function(e) {
+    photo.src = URL.createObjectURL(file);
 
-        const photo = document.getElementById("photo");
-
-        photo.src = e.target.result;
-        photo.style.display = "block";
-
-    };
-
-    reader.readAsDataURL(file);
+    photo.style.display = "block";
 
 });
