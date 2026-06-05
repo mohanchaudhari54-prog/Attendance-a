@@ -1,58 +1,102 @@
-function getLocation(){
+// Location
 
-if(navigator.geolocation){
+function getLocation() {
 
-navigator.geolocation.getCurrentPosition(
-success,
-error
-);
+    if (navigator.geolocation) {
 
-}else{
-alert("Location not supported");
-}
+        navigator.geolocation.getCurrentPosition(
+            showPosition,
+            showError
+        );
 
-}
+    } else {
 
-function success(position){
+        document.getElementById("status").innerHTML =
+            "Location not supported";
 
-let lat = position.coords.latitude;
-let lon = position.coords.longitude;
-
-document.getElementById("status").innerHTML =
-"Location Captured <br> Lat: "
-+ lat +
-"<br> Lon: " +
-lon;
+    }
 
 }
 
-function error(){
-alert("Location Access Denied");
+function showPosition(position) {
+
+    let lat = position.coords.latitude;
+    let lon = position.coords.longitude;
+
+    document.getElementById("status").innerHTML =
+        "✅ Location Captured <br><br>" +
+        "Latitude: " + lat +
+        "<br>Longitude: " + lon;
+
 }
 
-const video = document.getElementById('video');
+function showError(error) {
 
-navigator.mediaDevices.getUserMedia({
-video: true
-})
-.then(function(stream){
-video.srcObject = stream;
-})
-.catch(function(err){
-console.log(err);
-});
+    document.getElementById("status").innerHTML =
+        "❌ Location Permission Denied";
 
-function capturePhoto(){
+}
 
-const canvas = document.getElementById('canvas');
-const photo = document.getElementById('photo');
 
-const context = canvas.getContext('2d');
+// Camera
 
-context.drawImage(video,0,0,300,220);
+let video;
 
-const imageData = canvas.toDataURL('image/png');
+window.onload = function () {
 
-photo.src = imageData;
+    video = document.getElementById("video");
+
+    if (!navigator.mediaDevices ||
+        !navigator.mediaDevices.getUserMedia) {
+
+        document.getElementById("status").innerHTML =
+            "❌ Camera Not Supported";
+
+        return;
+    }
+
+    navigator.mediaDevices.getUserMedia({
+        video: {
+            facingMode: "user"
+        }
+    })
+    .then(function (stream) {
+
+        video.srcObject = stream;
+
+    })
+    .catch(function (err) {
+
+        document.getElementById("status").innerHTML =
+            "❌ Camera Error : " + err.message;
+
+    });
+
+};
+
+
+// Take Selfie
+
+function capturePhoto() {
+
+    const canvas =
+        document.getElementById("canvas");
+
+    const photo =
+        document.getElementById("photo");
+
+    const context =
+        canvas.getContext("2d");
+
+    context.drawImage(
+        video,
+        0,
+        0,
+        300,
+        220
+    );
+
+    photo.src =
+        canvas.toDataURL("image/png");
 
 }
