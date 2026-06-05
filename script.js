@@ -38,27 +38,25 @@ document.getElementById("status").innerHTML =
 }
 
 
-// SELFIE PREVIEW
+// SELFIE 
 
-document
-.getElementById("selfie")
-.addEventListener("change", function(event){
+document.getElementById("selfie").addEventListener("change", function(event) {
 
-const file = event.target.files[0];
+    const file = event.target.files[0];
 
-if(file){
+    if (!file) return;
 
-const reader = new FileReader();
+    const reader = new FileReader();
 
-reader.onload = function(e){
+    reader.onload = function(e) {
 
-document.getElementById("photo").src =
-e.target.result;
+        const photo = document.getElementById("photo");
 
-};
+        photo.src = e.target.result;
+        photo.style.display = "block";
 
-reader.readAsDataURL(file);
+    };
 
-}
+    reader.readAsDataURL(file);
 
 });
