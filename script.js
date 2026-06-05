@@ -1,102 +1,64 @@
-// Location
+// LOCATION
 
 function getLocation() {
 
-    if (navigator.geolocation) {
+if (navigator.geolocation) {
 
-        navigator.geolocation.getCurrentPosition(
-            showPosition,
-            showError
-        );
+navigator.geolocation.getCurrentPosition(
 
-    } else {
+function(position){
 
-        document.getElementById("status").innerHTML =
-            "Location not supported";
+let lat = position.coords.latitude;
+let lon = position.coords.longitude;
 
-    }
+document.getElementById("status").innerHTML =
+"✅ Attendance Marked<br><br>" +
+"Latitude : " + lat +
+"<br>" +
+"Longitude : " + lon;
 
-}
+},
 
-function showPosition(position) {
+function(error){
 
-    let lat = position.coords.latitude;
-    let lon = position.coords.longitude;
-
-    document.getElementById("status").innerHTML =
-        "✅ Location Captured <br><br>" +
-        "Latitude: " + lat +
-        "<br>Longitude: " + lon;
+document.getElementById("status").innerHTML =
+"❌ Location Permission Denied";
 
 }
 
-function showError(error) {
+);
 
-    document.getElementById("status").innerHTML =
-        "❌ Location Permission Denied";
+} else {
+
+document.getElementById("status").innerHTML =
+"❌ Geolocation Not Supported";
+
+}
 
 }
 
 
-// Camera
+// SELFIE PREVIEW
 
-let video;
+document
+.getElementById("selfie")
+.addEventListener("change", function(event){
 
-window.onload = function () {
+const file = event.target.files[0];
 
-    video = document.getElementById("video");
+if(file){
 
-    if (!navigator.mediaDevices ||
-        !navigator.mediaDevices.getUserMedia) {
+const reader = new FileReader();
 
-        document.getElementById("status").innerHTML =
-            "❌ Camera Not Supported";
+reader.onload = function(e){
 
-        return;
-    }
-
-    navigator.mediaDevices.getUserMedia({
-        video: {
-            facingMode: "user"
-        }
-    })
-    .then(function (stream) {
-
-        video.srcObject = stream;
-
-    })
-    .catch(function (err) {
-
-        document.getElementById("status").innerHTML =
-            "❌ Camera Error : " + err.message;
-
-    });
+document.getElementById("photo").src =
+e.target.result;
 
 };
 
-
-// Take Selfie
-
-function capturePhoto() {
-
-    const canvas =
-        document.getElementById("canvas");
-
-    const photo =
-        document.getElementById("photo");
-
-    const context =
-        canvas.getContext("2d");
-
-    context.drawImage(
-        video,
-        0,
-        0,
-        300,
-        220
-    );
-
-    photo.src =
-        canvas.toDataURL("image/png");
+reader.readAsDataURL(file);
 
 }
+
+});
