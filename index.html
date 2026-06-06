@@ -4,76 +4,820 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Attendance System</title>
-
-<link rel="stylesheet" href="style.css">
-
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
-body{
-font-family:Arial,sans-serif;
-background:#f4f4f4;
-text-align:center;
-padding:20px;
-}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 
-.container{
-max-width:400px;
-margin:auto;
-background:white;
-padding:20px;
-border-radius:10px;
-box-shadow:0 0 10px rgba(0,0,0,0.1);
-}
+  :root{
+    --bg:#0c0f14;
+    --bg2:#141820;
+    --card:#1a1f2b;
+    --card-hover:#1f2536;
+    --border:#2a3040;
+    --fg:#e8ecf4;
+    --fg-muted:#7a8499;
+    --accent:#e8a830;
+    --accent-glow:rgba(232,168,48,0.25);
+    --success:#34d399;
+    --danger:#f87171;
+    --danger-glow:rgba(248,113,113,0.2);
+    --success-glow:rgba(52,211,153,0.2);
+    --radius:14px;
+    --radius-sm:8px;
+  }
 
-input,button{
-width:100%;
-padding:12px;
-margin-top:10px;
-box-sizing:border-box;
-}
+  html{scroll-behavior:smooth}
 
-img{
-width:100%;
-margin-top:15px;
-border-radius:10px;
-}
+  body{
+    font-family:'Space Grotesk',sans-serif;
+    background:var(--bg);
+    color:var(--fg);
+    min-height:100vh;
+    overflow-x:hidden;
+    line-height:1.6;
+  }
+
+  /* Ambient background */
+  .ambient{
+    position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;
+  }
+  .ambient .orb{
+    position:absolute;border-radius:50%;filter:blur(120px);opacity:0.15;
+    animation:orbFloat 20s ease-in-out infinite alternate;
+  }
+  .ambient .orb:nth-child(1){
+    width:500px;height:500px;background:var(--accent);top:-10%;left:-10%;
+  }
+  .ambient .orb:nth-child(2){
+    width:400px;height:400px;background:#6366f1;bottom:-10%;right:-10%;
+    animation-delay:-7s;animation-duration:25s;
+  }
+  .ambient .orb:nth-child(3){
+    width:300px;height:300px;background:var(--success);top:50%;left:50%;
+    transform:translate(-50%,-50%);animation-delay:-14s;animation-duration:30s;
+  }
+  @keyframes orbFloat{
+    0%{transform:translate(0,0) scale(1)}
+    33%{transform:translate(40px,-30px) scale(1.1)}
+    66%{transform:translate(-20px,50px) scale(0.9)}
+    100%{transform:translate(30px,20px) scale(1.05)}
+  }
+
+  /* Grain overlay */
+  .grain{
+    position:fixed;inset:0;pointer-events:none;z-index:1;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    background-size:128px;
+  }
+
+  .app{
+    position:relative;z-index:2;
+    max-width:520px;margin:0 auto;padding:24px 16px 60px;
+  }
+
+  /* Header */
+  .header{
+    text-align:center;padding:30px 0 20px;
+  }
+  .header .logo-icon{
+    width:56px;height:56px;border-radius:16px;
+    background:linear-gradient(135deg,var(--accent),#d4941a);
+    display:inline-flex;align-items:center;justify-content:center;
+    font-size:24px;color:#0c0f14;margin-bottom:14px;
+    box-shadow:0 8px 32px var(--accent-glow);
+    animation:logoPulse 3s ease-in-out infinite;
+  }
+  @keyframes logoPulse{
+    0%,100%{box-shadow:0 8px 32px var(--accent-glow)}
+    50%{box-shadow:0 8px 48px rgba(232,168,48,0.4)}
+  }
+  .header h1{
+    font-size:26px;font-weight:700;letter-spacing:-0.5px;
+    background:linear-gradient(135deg,var(--fg),var(--fg-muted));
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  }
+  .header p{
+    color:var(--fg-muted);font-size:14px;margin-top:4px;
+  }
+
+  /* Clock */
+  .clock-card{
+    background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+    padding:20px;text-align:center;margin-bottom:20px;
+    position:relative;overflow:hidden;
+  }
+  .clock-card::before{
+    content:'';position:absolute;top:0;left:0;right:0;height:2px;
+    background:linear-gradient(90deg,transparent,var(--accent),transparent);
+  }
+  .clock-time{
+    font-family:'JetBrains Mono',monospace;font-size:42px;font-weight:500;
+    letter-spacing:2px;color:var(--fg);
+  }
+  .clock-date{
+    font-size:13px;color:var(--fg-muted);margin-top:4px;
+  }
+
+  /* Card base */
+  .card{
+    background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+    padding:20px;margin-bottom:16px;
+    transition:border-color 0.3s;
+  }
+  .card:hover{border-color:rgba(232,168,48,0.3)}
+  .card-title{
+    font-size:14px;font-weight:600;color:var(--fg-muted);
+    text-transform:uppercase;letter-spacing:1px;margin-bottom:14px;
+    display:flex;align-items:center;gap:8px;
+  }
+  .card-title i{color:var(--accent);font-size:15px}
+
+  /* Input */
+  .input-group{position:relative;margin-bottom:14px}
+  .input-group i{
+    position:absolute;left:14px;top:50%;transform:translateY(-50%);
+    color:var(--fg-muted);font-size:14px;transition:color 0.3s;
+  }
+  .input-group input{
+    width:100%;padding:13px 14px 13px 42px;
+    background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);
+    color:var(--fg);font-family:inherit;font-size:15px;
+    outline:none;transition:all 0.3s;
+  }
+  .input-group input::placeholder{color:var(--fg-muted);opacity:0.6}
+  .input-group input:focus{
+    border-color:var(--accent);
+    box-shadow:0 0 0 3px var(--accent-glow);
+  }
+  .input-group input:focus + i,
+  .input-group input:focus ~ i{color:var(--accent)}
+
+  /* Buttons */
+  .btn{
+    width:100%;padding:14px;border:none;border-radius:var(--radius-sm);
+    font-family:inherit;font-size:15px;font-weight:600;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;gap:10px;
+    transition:all 0.3s;position:relative;overflow:hidden;
+  }
+  .btn::after{
+    content:'';position:absolute;inset:0;
+    background:linear-gradient(135deg,rgba(255,255,255,0.1),transparent);
+    opacity:0;transition:opacity 0.3s;
+  }
+  .btn:hover::after{opacity:1}
+  .btn:active{transform:scale(0.98)}
+
+  .btn-punch-in{
+    background:linear-gradient(135deg,var(--success),#059669);
+    color:#042f2e;box-shadow:0 6px 24px var(--success-glow);
+  }
+  .btn-punch-in:hover{box-shadow:0 8px 32px rgba(52,211,153,0.35)}
+
+  .btn-punch-out{
+    background:linear-gradient(135deg,var(--danger),#dc2626);
+    color:#450a0a;box-shadow:0 6px 24px var(--danger-glow);
+  }
+  .btn-punch-out:hover{box-shadow:0 8px 32px rgba(248,113,113,0.35)}
+
+  .btn-capture{
+    background:var(--bg2);border:1px solid var(--border);color:var(--fg);
+  }
+  .btn-capture:hover{border-color:var(--accent);color:var(--accent)}
+
+  .btn-secondary{
+    background:transparent;border:1px solid var(--border);color:var(--fg-muted);
+    font-size:13px;padding:10px;
+  }
+  .btn-secondary:hover{border-color:var(--accent);color:var(--accent)}
+
+  .btn:disabled{opacity:0.4;cursor:not-allowed;transform:none}
+  .btn:disabled::after{display:none}
+
+  /* Camera area */
+  .camera-area{
+    position:relative;width:100%;aspect-ratio:4/3;
+    background:var(--bg2);border-radius:var(--radius-sm);
+    overflow:hidden;margin-bottom:14px;
+    border:1px solid var(--border);
+  }
+  .camera-area video,
+  .camera-area canvas,
+  .camera-area img{
+    width:100%;height:100%;object-fit:cover;display:block;
+  }
+  .camera-area .placeholder{
+    position:absolute;inset:0;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:10px;
+    color:var(--fg-muted);
+  }
+  .camera-area .placeholder i{font-size:36px;opacity:0.3}
+  .camera-area .placeholder span{font-size:13px;opacity:0.5}
+
+  /* Camera overlay frame */
+  .cam-frame{
+    position:absolute;inset:0;pointer-events:none;
+    border:2px solid transparent;
+    border-radius:var(--radius-sm);
+    transition:border-color 0.4s;
+  }
+  .cam-frame.active{border-color:var(--accent);animation:framePulse 2s ease-in-out infinite}
+  @keyframes framePulse{
+    0%,100%{border-color:var(--accent)}
+    50%{border-color:rgba(232,168,48,0.3)}
+  }
+
+  /* Location display */
+  .location-info{
+    display:flex;align-items:center;gap:10px;padding:10px 14px;
+    background:var(--bg2);border-radius:var(--radius-sm);
+    font-size:13px;color:var(--fg-muted);margin-top:12px;
+    border:1px solid var(--border);
+  }
+  .location-info i{color:var(--accent);flex-shrink:0}
+  .location-info .coords{
+    font-family:'JetBrains Mono',monospace;font-size:12px;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+
+  /* Status badge */
+  .status-badge{
+    display:inline-flex;align-items:center;gap:6px;
+    padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;
+    margin-top:12px;
+  }
+  .status-badge.idle{background:rgba(122,132,153,0.15);color:var(--fg-muted)}
+  .status-badge.active{
+    background:var(--success-glow);color:var(--success);
+    animation:badgeGlow 2s ease-in-out infinite;
+  }
+  .status-badge.out{
+    background:var(--danger-glow);color:var(--danger);
+  }
+  @keyframes badgeGlow{
+    0%,100%{box-shadow:0 0 0 0 transparent}
+    50%{box-shadow:0 0 12px var(--success-glow)}
+  }
+  .status-dot{
+    width:6px;height:6px;border-radius:50%;background:currentColor;
+  }
+  .status-badge.active .status-dot{animation:dotPulse 1.5s ease-in-out infinite}
+  @keyframes dotPulse{0%,100%{opacity:1}50%{opacity:0.3}}
+
+  /* Log entries */
+  .log-list{display:flex;flex-direction:column;gap:10px;max-height:400px;overflow-y:auto}
+  .log-list::-webkit-scrollbar{width:4px}
+  .log-list::-webkit-scrollbar-track{background:transparent}
+  .log-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+
+  .log-entry{
+    display:flex;gap:12px;padding:12px;
+    background:var(--bg2);border-radius:var(--radius-sm);
+    border:1px solid var(--border);
+    animation:slideIn 0.4s cubic-bezier(0.16,1,0.3,1);
+    transition:border-color 0.3s;
+  }
+  .log-entry:hover{border-color:rgba(232,168,48,0.3)}
+  @keyframes slideIn{
+    from{opacity:0;transform:translateY(12px)}
+    to{opacity:1;transform:translateY(0)}
+  }
+
+  .log-thumb{
+    width:48px;height:48px;border-radius:8px;object-fit:cover;
+    flex-shrink:0;background:var(--card);border:1px solid var(--border);
+  }
+  .log-details{flex:1;min-width:0}
+  .log-name{font-weight:600;font-size:14px;margin-bottom:2px;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .log-meta{font-size:12px;color:var(--fg-muted);display:flex;flex-wrap:wrap;gap:6px}
+  .log-meta span{display:inline-flex;align-items:center;gap:4px}
+  .log-meta i{font-size:10px}
+
+  .log-type{
+    padding:3px 8px;border-radius:4px;font-size:11px;font-weight:600;
+    flex-shrink:0;align-self:flex-start;
+  }
+  .log-type.in{background:var(--success-glow);color:var(--success)}
+  .log-type.out{background:var(--danger-glow);color:var(--danger)}
+
+  .empty-state{
+    text-align:center;padding:30px 20px;color:var(--fg-muted);
+  }
+  .empty-state i{font-size:32px;opacity:0.2;margin-bottom:10px;display:block}
+  .empty-state p{font-size:13px;opacity:0.6}
+
+  /* Stats row */
+  .stats-row{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;
+  }
+  .stat-item{
+    text-align:center;padding:14px 8px;
+    background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);
+    transition:border-color 0.3s;
+  }
+  .stat-item:hover{border-color:rgba(232,168,48,0.3)}
+  .stat-value{
+    font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:500;
+    color:var(--fg);
+  }
+  .stat-label{font-size:11px;color:var(--fg-muted);margin-top:2px;text-transform:uppercase;letter-spacing:0.5px}
+
+  /* Toast */
+  .toast-container{
+    position:fixed;top:20px;right:20px;z-index:9999;
+    display:flex;flex-direction:column;gap:8px;
+  }
+  .toast{
+    padding:12px 18px;border-radius:var(--radius-sm);
+    font-size:13px;font-weight:500;
+    display:flex;align-items:center;gap:10px;
+    box-shadow:0 8px 32px rgba(0,0,0,0.4);
+    animation:toastIn 0.4s cubic-bezier(0.16,1,0.3,1);
+    max-width:320px;
+    backdrop-filter:blur(12px);
+  }
+  .toast.success{background:rgba(52,211,153,0.15);border:1px solid rgba(52,211,153,0.3);color:var(--success)}
+  .toast.error{background:rgba(248,113,113,0.15);border:1px solid rgba(248,113,113,0.3);color:var(--danger)}
+  .toast.info{background:rgba(232,168,48,0.15);border:1px solid rgba(232,168,48,0.3);color:var(--accent)}
+  .toast.removing{animation:toastOut 0.3s ease forwards}
+  @keyframes toastIn{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
+  @keyframes toastOut{to{opacity:0;transform:translateX(40px)}}
+
+  /* Camera modal */
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:100;
+    display:none;align-items:center;justify-content:center;padding:20px;
+    backdrop-filter:blur(8px);
+  }
+  .modal-overlay.open{display:flex}
+  .modal{
+    background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+    padding:20px;width:100%;max-width:440px;
+    animation:modalIn 0.4s cubic-bezier(0.16,1,0.3,1);
+  }
+  @keyframes modalIn{from{opacity:0;transform:scale(0.9) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
+  .modal-header{
+    display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;
+  }
+  .modal-header h3{font-size:16px;font-weight:600}
+  .modal-close{
+    width:32px;height:32px;border-radius:8px;border:none;
+    background:var(--bg2);color:var(--fg-muted);cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    transition:all 0.2s;font-size:14px;
+  }
+  .modal-close:hover{background:var(--danger-glow);color:var(--danger)}
+  .modal video{width:100%;border-radius:var(--radius-sm);background:#000;margin-bottom:14px}
+  .modal-actions{display:flex;gap:10px}
+  .modal-actions .btn{flex:1}
+
+  /* Responsive */
+  @media(max-width:480px){
+    .app{padding:16px 12px 40px}
+    .clock-time{font-size:34px}
+    .stats-row{grid-template-columns:repeat(3,1fr);gap:6px}
+    .stat-value{font-size:18px}
+    .toast-container{top:10px;right:10px;left:10px}
+    .toast{max-width:100%}
+  }
+
+  /* Reduced motion */
+  @media(prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation-duration:0.01ms!important;transition-duration:0.01ms!important}
+  }
+
+  /* Hidden */
+  .hidden{display:none!important}
 </style>
-
 </head>
 <body>
 
-<div class="container">
+<!-- Ambient background -->
+<div class="ambient">
+  <div class="orb"></div>
+  <div class="orb"></div>
+  <div class="orb"></div>
+</div>
+<div class="grain"></div>
 
-<h1>Attendance System</h1>
+<!-- Toast container -->
+<div class="toast-container" id="toastContainer"></div>
 
-<input
-type="text"
-id="empName"
-placeholder="Employee Name">
+<!-- Camera Modal -->
+<div class="modal-overlay" id="cameraModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3><i class="fa-solid fa-camera" style="color:var(--accent);margin-right:6px"></i> Take Selfie</h3>
+      <button class="modal-close" onclick="closeCameraModal()" aria-label="Close camera"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <video id="modalVideo" autoplay playsinline muted></video>
+    <canvas id="captureCanvas" class="hidden"></canvas>
+    <div class="modal-actions">
+      <button class="btn btn-capture" onclick="closeCameraModal()"><i class="fa-solid fa-arrow-left"></i> Cancel</button>
+      <button class="btn btn-punch-in" onclick="captureSelfie()"><i class="fa-solid fa-camera"></i> Capture</button>
+    </div>
+  </div>
+</div>
 
-<button onclick="getLocation()">
-Punch In
-</button>
+<!-- Main App -->
+<div class="app">
 
-<p id="status"></p>
+  <header class="header">
+    <div class="logo-icon"><i class="fa-solid fa-fingerprint"></i></div>
+    <h1>Attendance System</h1>
+    <p>Geolocation-aware punch in & out</p>
+  </header>
 
-<hr>
+  <!-- Clock -->
+  <div class="clock-card">
+    <div class="clock-time" id="clockTime">--:--:--</div>
+    <div class="clock-date" id="clockDate">Loading...</div>
+  </div>
 
-<h3>Selfie Capture</h3>
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-item">
+      <div class="stat-value" id="statToday">0</div>
+      <div class="stat-label">Today</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value" id="statWeek">0</div>
+      <div class="stat-label">This Week</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value" id="statTotal">0</div>
+      <div class="stat-label">All Time</div>
+    </div>
+  </div>
 
-<input
-type="file"
-accept="image/*"
-capture="user"
-id="selfie">
+  <!-- Punch Card -->
+  <div class="card">
+    <div class="card-title"><i class="fa-solid fa-clock"></i> Clock In / Out</div>
 
-<img
-id="photo"
-style="display:none; width:100%; margin-top:15px;"
-alt="Selfie Preview">
+    <div class="input-group">
+      <input type="text" id="empName" placeholder="Enter your name" autocomplete="off">
+      <i class="fa-solid fa-user"></i>
+    </div>
+
+    <!-- Selfie preview -->
+    <div class="camera-area" id="cameraArea">
+      <div class="placeholder" id="camPlaceholder">
+        <i class="fa-solid fa-user-circle"></i>
+        <span>Capture a selfie for verification</span>
+      </div>
+      <img id="selfiePreview" class="hidden" alt="Selfie preview">
+      <div class="cam-frame" id="camFrame"></div>
+    </div>
+
+    <button class="btn btn-capture" id="btnCapture" onclick="openCameraModal()" style="margin-bottom:10px">
+      <i class="fa-solid fa-camera"></i> Take Selfie
+    </button>
+
+    <button class="btn btn-punch-in" id="btnPunch" onclick="handlePunch()">
+      <i class="fa-solid fa-right-to-bracket"></i> <span id="btnPunchText">Punch In</span>
+    </button>
+
+    <div style="text-align:center">
+      <div class="status-badge idle" id="statusBadge">
+        <span class="status-dot"></span>
+        <span id="statusText">Idle</span>
+      </div>
+    </div>
+
+    <div class="location-info hidden" id="locationInfo">
+      <i class="fa-solid fa-location-dot"></i>
+      <span class="coords" id="locationCoords">Acquiring location...</span>
+    </div>
+  </div>
+
+  <!-- Attendance Log -->
+  <div class="card">
+    <div class="card-title" style="justify-content:space-between">
+      <span><i class="fa-solid fa-list-check"></i> Attendance Log</span>
+      <button class="btn btn-secondary" onclick="clearLogs()" style="width:auto;padding:5px 12px;font-size:11px">
+        <i class="fa-solid fa-trash-can"></i> Clear
+      </button>
+    </div>
+    <div class="log-list" id="logList">
+      <div class="empty-state" id="emptyState">
+        <i class="fa-solid fa-clipboard-list"></i>
+        <p>No attendance records yet.<br>Punch in to get started.</p>
+      </div>
+    </div>
+  </div>
 
 </div>
 
-<script src="script.js"></script>
+<script>
+  // ===================== State =====================
+  let currentState = 'idle'; // idle | punched-in
+  let capturedImage = null; // base64 string
+  let currentLocation = null; // {lat, lng}
+  let attendanceLogs = JSON.parse(localStorage.getItem('attendanceLogs') || '[]');
+  let cameraStream = null;
 
+  // ===================== DOM References =====================
+  const clockTimeEl = document.getElementById('clockTime');
+  const clockDateEl = document.getElementById('clockDate');
+  const empNameEl = document.getElementById('empName');
+  const btnPunch = document.getElementById('btnPunch');
+  const btnPunchText = document.getElementById('btnPunchText');
+  const statusBadge = document.getElementById('statusBadge');
+  const statusText = document.getElementById('statusText');
+  const locationInfo = document.getElementById('locationInfo');
+  const locationCoords = document.getElementById('locationCoords');
+  const selfiePreview = document.getElementById('selfiePreview');
+  const camPlaceholder = document.getElementById('camPlaceholder');
+  const camFrame = document.getElementById('camFrame');
+  const logList = document.getElementById('logList');
+  const emptyState = document.getElementById('emptyState');
+  const cameraModal = document.getElementById('cameraModal');
+  const modalVideo = document.getElementById('modalVideo');
+  const captureCanvas = document.getElementById('captureCanvas');
+
+  // ===================== Clock =====================
+  function updateClock() {
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2, '0');
+    const m = String(now.getMinutes()).padStart(2, '0');
+    const s = String(now.getSeconds()).padStart(2, '0');
+    clockTimeEl.textContent = `${h}:${m}:${s}`;
+
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    clockDateEl.textContent = now.toLocaleDateString('en-US', options);
+  }
+  updateClock();
+  setInterval(updateClock, 1000);
+
+  // ===================== Toast Notifications =====================
+  function showToast(message, type = 'info') {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    const icons = { success: 'fa-circle-check', error: 'fa-circle-xmark', info: 'fa-circle-info' };
+    toast.innerHTML = `<i class="fa-solid ${icons[type] || icons.info}"></i><span>${message}</span>`;
+    container.appendChild(toast);
+    setTimeout(() => {
+      toast.classList.add('removing');
+      setTimeout(() => toast.remove(), 300);
+    }, 3500);
+  }
+
+  // ===================== Geolocation =====================
+  function getLocation() {
+    return new Promise((resolve, reject) => {
+      if (!navigator.geolocation) {
+        reject(new Error('Geolocation is not supported by your browser'));
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(
+        (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+        (err) => reject(err),
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      );
+    });
+  }
+
+  // ===================== Camera Modal =====================
+  async function openCameraModal() {
+    try {
+      cameraStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } }
+      });
+      modalVideo.srcObject = cameraStream;
+      cameraModal.classList.add('open');
+    } catch (err) {
+      showToast('Camera access denied or unavailable', 'error');
+    }
+  }
+
+  function closeCameraModal() {
+    cameraModal.classList.remove('open');
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(t => t.stop());
+      cameraStream = null;
+    }
+    modalVideo.srcObject = null;
+  }
+
+  function captureSelfie() {
+    if (!cameraStream) return;
+    const vw = modalVideo.videoWidth;
+    const vh = modalVideo.videoHeight;
+    captureCanvas.width = vw;
+    captureCanvas.height = vh;
+    const ctx = captureCanvas.getContext('2d');
+    // Mirror the image for selfie
+    ctx.translate(vw, 0);
+    ctx.scale(-1, 1);
+    ctx.drawImage(modalVideo, 0, 0, vw, vh);
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+    capturedImage = captureCanvas.toDataURL('image/jpeg', 0.8);
+    selfiePreview.src = capturedImage;
+    selfiePreview.classList.remove('hidden');
+    camPlaceholder.classList.add('hidden');
+    camFrame.classList.add('active');
+
+    closeCameraModal();
+    showToast('Selfie captured successfully', 'success');
+  }
+
+  // Mirror the modal video for natural selfie view
+  modalVideo.style.transform = 'scaleX(-1)';
+
+  // ===================== Punch In / Out =====================
+  async function handlePunch() {
+    const name = empNameEl.value.trim();
+    if (!name) {
+      showToast('Please enter your name first', 'error');
+      empNameEl.focus();
+      return;
+    }
+    if (!capturedImage) {
+      showToast('Please capture a selfie first', 'error');
+      return;
+    }
+
+    // Disable button during processing
+    btnPunch.disabled = true;
+
+    try {
+      currentLocation = await getLocation();
+      locationInfo.classList.remove('hidden');
+      locationCoords.textContent = `${currentLocation.lat.toFixed(6)}, ${currentLocation.lng.toFixed(6)}`;
+    } catch (err) {
+      showToast('Could not get location. Using approximate location.', 'info');
+      currentLocation = { lat: 0, lng: 0 };
+      locationInfo.classList.remove('hidden');
+      locationCoords.textContent = 'Location unavailable';
+    }
+
+    const now = new Date();
+    const isPunchIn = currentState === 'idle';
+    const record = {
+      id: Date.now(),
+      name: name,
+      type: isPunchIn ? 'in' : 'out',
+      time: now.toISOString(),
+      timeStr: now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+      dateStr: now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+      photo: capturedImage,
+      lat: currentLocation.lat,
+      lng: currentLocation.lng
+    };
+
+    attendanceLogs.unshift(record);
+    localStorage.setItem('attendanceLogs', JSON.stringify(attendanceLogs));
+
+    if (isPunchIn) {
+      currentState = 'punched-in';
+      btnPunch.className = 'btn btn-punch-out';
+      btnPunchText.textContent = 'Punch Out';
+      btnPunch.querySelector('i').className = 'fa-solid fa-right-from-bracket';
+      statusBadge.className = 'status-badge active';
+      statusText.textContent = 'Clocked In';
+      showToast(`Punched in at ${record.timeStr}`, 'success');
+    } else {
+      currentState = 'idle';
+      btnPunch.className = 'btn btn-punch-in';
+      btnPunchText.textContent = 'Punch In';
+      btnPunch.querySelector('i').className = 'fa-solid fa-right-to-bracket';
+      statusBadge.className = 'status-badge out';
+      statusText.textContent = 'Clocked Out';
+      showToast(`Punched out at ${record.timeStr}`, 'info');
+
+      // Reset selfie for next session
+      setTimeout(() => {
+        capturedImage = null;
+        selfiePreview.classList.add('hidden');
+        camPlaceholder.classList.remove('hidden');
+        camFrame.classList.remove('active');
+        statusBadge.className = 'status-badge idle';
+        statusText.textContent = 'Idle';
+        locationInfo.classList.add('hidden');
+      }, 1500);
+    }
+
+    renderLogs();
+    updateStats();
+    btnPunch.disabled = false;
+  }
+
+  // ===================== Render Logs =====================
+  function renderLogs() {
+    if (attendanceLogs.length === 0) {
+      logList.innerHTML = '';
+      logList.appendChild(emptyState);
+      emptyState.classList.remove('hidden');
+      return;
+    }
+    emptyState.classList.add('hidden');
+
+    // Only render, don't clear to preserve animation on new items
+    const existingIds = new Set(Array.from(logList.querySelectorAll('.log-entry')).map(el => el.dataset.id));
+    const fragment = document.createDocumentFragment();
+
+    attendanceLogs.forEach(log => {
+      if (existingIds.has(String(log.id))) return;
+      const entry = document.createElement('div');
+      entry.className = 'log-entry';
+      entry.dataset.id = log.id;
+      entry.innerHTML = `
+        <img class="log-thumb" src="${log.photo}" alt="${log.name}" loading="lazy">
+        <div class="log-details">
+          <div class="log-name">${escapeHtml(log.name)}</div>
+          <div class="log-meta">
+            <span><i class="fa-solid fa-calendar-day"></i> ${log.dateStr}</span>
+            <span><i class="fa-solid fa-clock"></i> ${log.timeStr}</span>
+            ${log.lat !== 0 ? `<span><i class="fa-solid fa-location-dot"></i> ${log.lat.toFixed(4)}, ${log.lng.toFixed(4)}</span>` : ''}
+          </div>
+        </div>
+        <span class="log-type ${log.type}">${log.type === 'in' ? 'IN' : 'OUT'}</span>
+      `;
+      fragment.appendChild(entry);
+    });
+
+    logList.prepend(fragment);
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  // ===================== Stats =====================
+  function updateStats() {
+    const now = new Date();
+    const todayStr = now.toDateString();
+    const weekStart = new Date(now);
+    weekStart.setDate(now.getDate() - now.getDay());
+    weekStart.setHours(0, 0, 0, 0);
+
+    let todayCount = 0;
+    let weekCount = 0;
+
+    attendanceLogs.forEach(log => {
+      const logDate = new Date(log.time);
+      if (logDate.toDateString() === todayStr) todayCount++;
+      if (logDate >= weekStart) weekCount++;
+    });
+
+    animateCounter('statToday', todayCount);
+    animateCounter('statWeek', weekCount);
+    animateCounter('statTotal', attendanceLogs.length);
+  }
+
+  function animateCounter(elId, target) {
+    const el = document.getElementById(elId);
+    const current = parseInt(el.textContent) || 0;
+    if (current === target) return;
+
+    const duration = 400;
+    const start = performance.now();
+
+    function tick(now) {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      // Ease out quad
+      const eased = 1 - (1 - progress) * (1 - progress);
+      el.textContent = Math.round(current + (target - current) * eased);
+      if (progress < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  // ===================== Clear Logs =====================
+  function clearLogs() {
+    if (attendanceLogs.length === 0) {
+      showToast('No logs to clear', 'info');
+      return;
+    }
+    attendanceLogs = [];
+    localStorage.removeItem('attendanceLogs');
+    renderLogs();
+    updateStats();
+    showToast('All attendance logs cleared', 'info');
+  }
+
+  // ===================== Init =====================
+  renderLogs();
+  updateStats();
+
+  // Close modal on escape
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && cameraModal.classList.contains('open')) {
+      closeCameraModal();
+    }
+  });
+
+  // Close modal clicking overlay
+  cameraModal.addEventListener('click', (e) => {
+    if (e.target === cameraModal) closeCameraModal();
+  });
+</script>
 </body>
 </html>
