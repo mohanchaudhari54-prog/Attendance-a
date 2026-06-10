@@ -3,230 +3,256 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Attendance System</title>
+<title>Attendance & Payroll System</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#0a0d12;--bg2:#11151d;--card:#161b27;--card-hover:#1c2233;
-  --border:#252d3d;--fg:#e2e8f0;--fg-muted:#64748b;
-  --accent:#e8a830;--accent-glow:rgba(232,168,48,0.2);
-  --success:#34d399;--success-glow:rgba(52,211,153,0.15);
-  --danger:#f87171;--danger-glow:rgba(248,113,113,0.15);
-  --radius:14px;--radius-sm:8px;
-}
+:root{--bg:#0a0d12;--bg2:#11151d;--card:#161b27;--card2:#1c2233;--border:#252d3d;--fg:#e2e8f0;--fg2:#94a3b8;--muted:#64748b;--accent:#e8a830;--ag:rgba(232,168,48,.2);--ok:#34d399;--okg:rgba(52,211,153,.15);--err:#f87171;--errg:rgba(248,113,113,.15);--info:#818cf8;--infog:rgba(129,140,248,.15);--r:14px;--rs:8px}
 html{scroll-behavior:smooth}
 body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--fg);min-height:100vh;overflow-x:hidden;line-height:1.6}
-
-/* Ambient */
 .ambient{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
-.ambient .orb{position:absolute;border-radius:50%;filter:blur(120px);opacity:0.12;animation:orbF 20s ease-in-out infinite alternate}
+.ambient .orb{position:absolute;border-radius:50%;filter:blur(120px);opacity:.1;animation:oF 20s ease-in-out infinite alternate}
 .ambient .orb:nth-child(1){width:500px;height:500px;background:var(--accent);top:-10%;left:-10%}
 .ambient .orb:nth-child(2){width:400px;height:400px;background:#6366f1;bottom:-10%;right:-10%;animation-delay:-7s;animation-duration:25s}
-.ambient .orb:nth-child(3){width:300px;height:300px;background:var(--success);top:50%;left:50%;transform:translate(-50%,-50%);animation-delay:-14s;animation-duration:30s}
-@keyframes orbF{0%{transform:translate(0,0) scale(1)}50%{transform:translate(30px,-40px) scale(1.1)}100%{transform:translate(-20px,30px) scale(.95)}}
+.ambient .orb:nth-child(3){width:300px;height:300px;background:var(--ok);top:50%;left:50%;transform:translate(-50%,-50%);animation-delay:-14s;animation-duration:30s}
+@keyframes oF{0%{transform:translate(0,0) scale(1)}50%{transform:translate(30px,-40px) scale(1.1)}100%{transform:translate(-20px,30px) scale(.95)}}
 .grain{position:fixed;inset:0;pointer-events:none;z-index:1;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");background-size:128px}
-
-/* Views */
 .view{position:relative;z-index:2;min-height:100vh}
 .hidden{display:none!important}
 
 /* Toast */
-.toast-container{position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px}
-.toast{padding:12px 18px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;display:flex;align-items:center;gap:10px;box-shadow:0 8px 32px rgba(0,0,0,0.5);animation:tIn .4s cubic-bezier(.16,1,.3,1);max-width:340px;backdrop-filter:blur(12px)}
-.toast.success{background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.25);color:var(--success)}
-.toast.error{background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.25);color:var(--danger)}
-.toast.info{background:rgba(232,168,48,.12);border:1px solid rgba(232,168,48,.25);color:var(--accent)}
-.toast.removing{animation:tOut .3s ease forwards}
-@keyframes tIn{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
-@keyframes tOut{to{opacity:0;transform:translateX(40px)}}
+.tc{position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px}
+.toast{padding:12px 18px;border-radius:var(--rs);font-size:13px;font-weight:500;display:flex;align-items:center;gap:10px;box-shadow:0 8px 32px rgba(0,0,0,.5);animation:tI .4s cubic-bezier(.16,1,.3,1);max-width:360px;backdrop-filter:blur(12px)}
+.toast.ok{background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.25);color:var(--ok)}
+.toast.err{background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.25);color:var(--err)}
+.toast.inf{background:rgba(232,168,48,.12);border:1px solid rgba(232,168,48,.25);color:var(--accent)}
+.toast.out{animation:tO .3s ease forwards}
+@keyframes tI{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:none}}
+@keyframes tO{to{opacity:0;transform:translateX(40px)}}
 
-/* ===== LOGIN ===== */
-.login-wrap{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
-.login-card{width:100%;max-width:400px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:36px 28px;animation:cardIn .6s cubic-bezier(.16,1,.3,1)}
-@keyframes cardIn{from{opacity:0;transform:translateY(30px) scale(.96)}to{opacity:1;transform:none}}
-.login-card .logo-icon{width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,var(--accent),#d4941a);display:inline-flex;align-items:center;justify-content:center;font-size:24px;color:#0a0d12;margin-bottom:16px;box-shadow:0 8px 32px var(--accent-glow)}
-.login-card h1{font-size:24px;font-weight:700;margin-bottom:4px}
-.login-card .sub{color:var(--fg-muted);font-size:14px;margin-bottom:28px}
-.demo-hint{margin-top:20px;padding:12px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:12px;color:var(--fg-muted);line-height:1.8}
-.demo-hint strong{color:var(--accent);font-family:'JetBrains Mono',monospace}
+/* Inputs */
+.ig{position:relative;margin-bottom:14px}
+.ig i{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px;transition:color .3s;pointer-events:none;z-index:1}
+.ig input,.ig select,.ig textarea{width:100%;padding:12px 14px 12px 42px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--rs);color:var(--fg);font-family:inherit;font-size:14px;outline:none;transition:all .3s}
+.ig textarea{padding-left:42px;min-height:60px;resize:vertical}
+.ig select{cursor:pointer;-webkit-appearance:none;appearance:none}
+.ig input::placeholder{color:var(--muted);opacity:.5}
+.ig input:focus,.ig select:focus,.ig textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--ag)}
+.ig input:focus~i,.ig select:focus~i,.ig textarea:focus~i{color:var(--accent)}
 
-/* Shared components */
-.input-group{position:relative;margin-bottom:14px}
-.input-group i{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--fg-muted);font-size:14px;transition:color .3s;pointer-events:none}
-.input-group input,.input-group select{width:100%;padding:13px 14px 13px 42px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--fg);font-family:inherit;font-size:15px;outline:none;transition:all .3s}
-.input-group select{padding-left:42px;cursor:pointer;-webkit-appearance:none;appearance:none}
-.input-group input::placeholder{color:var(--fg-muted);opacity:.5}
-.input-group input:focus,.input-group select:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
-.input-group input:focus~i{color:var(--accent)}
-
-.btn{width:100%;padding:13px;border:none;border-radius:var(--radius-sm);font-family:inherit;font-size:15px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:all .25s;position:relative;overflow:hidden}
+/* Buttons */
+.btn{padding:12px 18px;border:none;border-radius:var(--rs);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:all .25s;position:relative;overflow:hidden;white-space:nowrap}
 .btn::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.1),transparent);opacity:0;transition:opacity .3s}
 .btn:hover::after{opacity:1}
 .btn:active{transform:scale(.98)}
 .btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
 .btn:disabled::after{display:none}
-.btn-login{background:linear-gradient(135deg,var(--accent),#d4941a);color:#0a0d12;box-shadow:0 6px 24px var(--accent-glow)}
-.btn-login:hover{box-shadow:0 8px 36px rgba(232,168,48,.35)}
-.btn-punch-in{background:linear-gradient(135deg,var(--success),#059669);color:#042f2e;box-shadow:0 6px 24px var(--success-glow)}
-.btn-punch-out{background:linear-gradient(135deg,var(--danger),#dc2626);color:#450a0a;box-shadow:0 6px 24px var(--danger-glow)}
-.btn-capture{background:var(--bg2);border:1px solid var(--border);color:var(--fg)}
-.btn-capture:hover{border-color:var(--accent);color:var(--accent)}
-.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--fg-muted);font-size:13px;padding:9px 16px;width:auto}
-.btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
-.btn-sm{padding:8px 14px;font-size:13px;width:auto}
+.btn-f{width:100%}
+.btn-pri{background:linear-gradient(135deg,var(--accent),#d4941a);color:#0a0d12;box-shadow:0 6px 24px var(--ag)}
+.btn-ok{background:linear-gradient(135deg,var(--ok),#059669);color:#042f2e;box-shadow:0 6px 24px var(--okg)}
+.btn-err{background:linear-gradient(135deg,var(--err),#dc2626);color:#450a0a;box-shadow:0 6px 24px var(--errg)}
+.btn-sec{background:var(--bg2);border:1px solid var(--border);color:var(--fg)}
+.btn-sec:hover{border-color:var(--accent);color:var(--accent)}
+.btn-gh{background:transparent;border:1px solid var(--border);color:var(--muted);font-size:13px;padding:9px 16px}
+.btn-gh:hover{border-color:var(--accent);color:var(--accent)}
+.btn-sm{padding:8px 14px;font-size:13px}
+.btn-xs{padding:5px 10px;font-size:12px}
 
-.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px;transition:border-color .3s}
+/* Card */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:16px;transition:border-color .3s}
 .card:hover{border-color:rgba(232,168,48,.2)}
-.card-title{font-size:13px;font-weight:600;color:var(--fg-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px;display:flex;align-items:center;gap:8px}
-.card-title i{color:var(--accent);font-size:14px}
+.ct{font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.ct i{color:var(--accent);font-size:14px}
 
-/* ===== TOPBAR ===== */
-.topbar{position:sticky;top:0;z-index:50;background:rgba(10,13,18,.85);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0 20px;height:60px;display:flex;align-items:center;justify-content:space-between}
-.topbar-brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px}
-.topbar-brand i{color:var(--accent);font-size:18px}
-.topbar-right{display:flex;align-items:center;gap:12px}
-.role-badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
-.role-badge.admin{background:rgba(232,168,48,.15);color:var(--accent)}
-.role-badge.employee{background:var(--success-glow);color:var(--success)}
-.user-name{font-size:14px;font-weight:500;color:var(--fg)}
-.btn-logout{background:none;border:1px solid var(--border);color:var(--fg-muted);padding:7px 14px;border-radius:var(--radius-sm);font-size:13px;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .2s}
-.btn-logout:hover{border-color:var(--danger);color:var(--danger)}
+/* Topbar */
+.topbar{position:sticky;top:0;z-index:50;background:rgba(10,13,18,.88);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0 20px;height:58px;display:flex;align-items:center;justify-content:space-between}
+.tb-brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px}
+.tb-brand i{color:var(--accent);font-size:18px}
+.tb-right{display:flex;align-items:center;gap:12px}
+.badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.badge-admin{background:var(--ag);color:var(--accent)}
+.badge-emp{background:var(--okg);color:var(--ok)}
+.uname{font-size:14px;font-weight:500}
+.btn-lo{background:none;border:1px solid var(--border);color:var(--muted);padding:6px 14px;border-radius:var(--rs);font-size:13px;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .2s}
+.btn-lo:hover{border-color:var(--err);color:var(--err)}
 
-/* ===== EMPLOYEE VIEW ===== */
-.emp-content{max-width:520px;margin:0 auto;padding:24px 16px 60px}
-.clock-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;text-align:center;margin-bottom:16px;position:relative;overflow:hidden}
-.clock-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent)}
-.clock-time{font-family:'JetBrains Mono',monospace;font-size:42px;font-weight:500;letter-spacing:2px}
-.clock-date{font-size:13px;color:var(--fg-muted);margin-top:4px}
+/* Tabs */
+.tabs{display:flex;gap:4px;padding:12px 20px 0;background:var(--bg);border-bottom:1px solid var(--border);overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tab{padding:10px 18px;border:none;background:none;color:var(--muted);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;transition:all .25s;white-space:nowrap}
+.tab:hover{color:var(--fg2)}
+.tab.on{color:var(--accent);border-bottom-color:var(--accent)}
+.tpanel{display:none}.tpanel.on{display:block}
 
-.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
-.stat-item{text-align:center;padding:14px 8px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);transition:border-color .3s}
-.stat-item:hover{border-color:rgba(232,168,48,.25)}
-.stat-value{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:500}
-.stat-label{font-size:11px;color:var(--fg-muted);margin-top:2px;text-transform:uppercase;letter-spacing:.5px}
+/* Login */
+.lwrap{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+.lcard{width:100%;max-width:400px;background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:36px 28px;animation:cIn .6s cubic-bezier(.16,1,.3,1)}
+@keyframes cIn{from{opacity:0;transform:translateY(30px) scale(.96)}to{opacity:1;transform:none}}
+.logo-i{width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,var(--accent),#d4941a);display:inline-flex;align-items:center;justify-content:center;font-size:22px;color:#0a0d12;margin-bottom:16px;box-shadow:0 8px 32px var(--ag)}
+.demo-h{margin-top:20px;padding:12px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--rs);font-size:12px;color:var(--muted);line-height:1.8}
+.demo-h strong{color:var(--accent);font-family:'JetBrains Mono',monospace}
 
-.camera-area{position:relative;width:100%;aspect-ratio:4/3;background:var(--bg2);border-radius:var(--radius-sm);overflow:hidden;margin-bottom:14px;border:1px solid var(--border)}
-.camera-area video,.camera-area img{width:100%;height:100%;object-fit:cover;display:block}
-.camera-area .placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--fg-muted)}
-.camera-area .placeholder i{font-size:36px;opacity:.25}
-.camera-area .placeholder span{font-size:13px;opacity:.4}
-.cam-frame{position:absolute;inset:0;pointer-events:none;border:2px solid transparent;border-radius:var(--radius-sm);transition:border-color .4s}
-.cam-frame.active{border-color:var(--accent);animation:fp 2s ease-in-out infinite}
+/* Clock */
+.clk-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px;text-align:center;margin-bottom:16px;position:relative;overflow:hidden}
+.clk-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent)}
+.clk-t{font-family:'JetBrains Mono',monospace;font-size:40px;font-weight:500;letter-spacing:2px}
+.clk-d{font-size:13px;color:var(--muted);margin-top:4px}
+
+/* Stats */
+.srow{display:grid;gap:10px;margin-bottom:16px}
+.srow-3{grid-template-columns:repeat(3,1fr)}
+.srow-4{grid-template-columns:repeat(4,1fr)}
+.si{text-align:center;padding:14px 8px;background:var(--card);border:1px solid var(--border);border-radius:var(--rs);transition:border-color .3s}
+.si:hover{border-color:rgba(232,168,48,.25)}
+.sv{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:500}
+.sl{font-size:11px;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:.5px}
+
+/* Admin stat cards */
+.asi{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:18px 16px;transition:border-color .3s;position:relative;overflow:hidden}
+.asi:hover{border-color:rgba(232,168,48,.25)}
+.asi .si-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;margin-bottom:12px}
+.asi .si-icon.a{background:var(--ag);color:var(--accent)}
+.asi .si-icon.g{background:var(--okg);color:var(--ok)}
+.asi .si-icon.r{background:var(--errg);color:var(--err)}
+.asi .si-icon.b{background:var(--infog);color:var(--info)}
+.asi .sv{font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:500}
+.asi .sl{font-size:12px;color:var(--muted);margin-top:2px}
+
+/* Camera */
+.cam-area{position:relative;width:100%;aspect-ratio:4/3;background:var(--bg2);border-radius:var(--rs);overflow:hidden;margin-bottom:14px;border:1px solid var(--border)}
+.cam-area video,.cam-area img{width:100%;height:100%;object-fit:cover;display:block}
+.cam-ph{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--muted)}
+.cam-ph i{font-size:36px;opacity:.25}
+.cam-ph span{font-size:13px;opacity:.4}
+.cam-fr{position:absolute;inset:0;pointer-events:none;border:2px solid transparent;border-radius:var(--rs);transition:border-color .4s}
+.cam-fr.on{border-color:var(--accent);animation:fp 2s ease-in-out infinite}
 @keyframes fp{0%,100%{border-color:var(--accent)}50%{border-color:rgba(232,168,48,.25)}}
 
-.location-info{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius-sm);font-size:13px;color:var(--fg-muted);margin-top:12px;border:1px solid var(--border)}
-.location-info i{color:var(--accent);flex-shrink:0}
-.location-info .coords{font-family:'JetBrains Mono',monospace;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.loc-info{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--rs);font-size:13px;color:var(--muted);margin-top:12px;border:1px solid var(--border)}
+.loc-info i{color:var(--accent);flex-shrink:0}
+.loc-info .coords{font-family:'JetBrains Mono',monospace;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
-.status-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;margin-top:12px}
-.status-badge.idle{background:rgba(100,116,139,.12);color:var(--fg-muted)}
-.status-badge.active{background:var(--success-glow);color:var(--success);animation:bg 2s ease-in-out infinite}
-.status-badge.out{background:var(--danger-glow);color:var(--danger)}
-@keyframes bg{0%,100%{box-shadow:0 0 0 0 transparent}50%{box-shadow:0 0 12px var(--success-glow)}}
-.status-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
-.status-badge.active .status-dot{animation:dp 1.5s ease-in-out infinite}
+.st-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;margin-top:12px}
+.st-badge.idle{background:rgba(100,116,139,.12);color:var(--muted)}
+.st-badge.active{background:var(--okg);color:var(--ok);animation:bg2 2s ease-in-out infinite}
+.st-badge.out{background:var(--errg);color:var(--err)}
+@keyframes bg2{0%,100%{box-shadow:0 0 0 0 transparent}50%{box-shadow:0 0 12px var(--okg)}}
+.st-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+.st-badge.active .st-dot{animation:dp 1.5s ease-in-out infinite}
 @keyframes dp{0%,100%{opacity:1}50%{opacity:.3}}
 
-.log-list{display:flex;flex-direction:column;gap:10px;max-height:400px;overflow-y:auto}
-.log-list::-webkit-scrollbar{width:4px}
-.log-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
-.log-entry{display:flex;gap:12px;padding:12px;background:var(--bg2);border-radius:var(--radius-sm);border:1px solid var(--border);animation:sIn .4s cubic-bezier(.16,1,.3,1);transition:border-color .3s}
-.log-entry:hover{border-color:rgba(232,168,48,.25)}
+/* Log entries */
+.ll{display:flex;flex-direction:column;gap:10px;max-height:420px;overflow-y:auto}
+.ll::-webkit-scrollbar{width:4px}
+.ll::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+.le{display:flex;gap:12px;padding:12px;background:var(--bg2);border-radius:var(--rs);border:1px solid var(--border);animation:sIn .4s cubic-bezier(.16,1,.3,1);transition:border-color .3s}
+.le:hover{border-color:rgba(232,168,48,.25)}
 @keyframes sIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
-.log-thumb{width:48px;height:48px;border-radius:8px;object-fit:cover;flex-shrink:0;background:var(--card);border:1px solid var(--border)}
-.log-details{flex:1;min-width:0}
-.log-name{font-weight:600;font-size:14px;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.log-meta{font-size:12px;color:var(--fg-muted);display:flex;flex-wrap:wrap;gap:6px}
-.log-meta span{display:inline-flex;align-items:center;gap:4px}
-.log-meta i{font-size:10px}
-.log-type{padding:3px 8px;border-radius:4px;font-size:11px;font-weight:600;flex-shrink:0;align-self:flex-start}
-.log-type.in{background:var(--success-glow);color:var(--success)}
-.log-type.out{background:var(--danger-glow);color:var(--danger)}
-.empty-state{text-align:center;padding:30px 20px;color:var(--fg-muted)}
-.empty-state i{font-size:32px;opacity:.15;margin-bottom:10px;display:block}
-.empty-state p{font-size:13px;opacity:.5}
+.lt{width:48px;height:48px;border-radius:8px;object-fit:cover;flex-shrink:0;background:var(--card);border:1px solid var(--border)}
+.ld{flex:1;min-width:0}
+.ln{font-weight:600;font-size:14px;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lm{font-size:12px;color:var(--muted);display:flex;flex-wrap:wrap;gap:6px}
+.lm span{display:inline-flex;align-items:center;gap:4px}
+.lm i{font-size:10px}
+.ltp{padding:3px 8px;border-radius:4px;font-size:11px;font-weight:600;flex-shrink:0;align-self:flex-start}
+.ltp.in{background:var(--okg);color:var(--ok)}
+.ltp.out{background:var(--errg);color:var(--err)}
+.es{text-align:center;padding:30px 20px;color:var(--muted)}
+.es i{font-size:32px;opacity:.15;margin-bottom:10px;display:block}
+.es p{font-size:13px;opacity:.5}
 
-/* ===== ADMIN VIEW ===== */
-.admin-content{max-width:900px;margin:0 auto;padding:24px 16px 60px}
-.admin-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
-.admin-stat{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px 16px;transition:border-color .3s;position:relative;overflow:hidden}
-.admin-stat:hover{border-color:rgba(232,168,48,.25)}
-.admin-stat .stat-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;margin-bottom:12px}
-.admin-stat .stat-icon.amber{background:var(--accent-glow);color:var(--accent)}
-.admin-stat .stat-icon.green{background:var(--success-glow);color:var(--success)}
-.admin-stat .stat-icon.red{background:var(--danger-glow);color:var(--danger)}
-.admin-stat .stat-icon.blue{background:rgba(99,102,241,.15);color:#818cf8}
-.admin-stat .stat-val{font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:500}
-.admin-stat .stat-lbl{font-size:12px;color:var(--fg-muted);margin-top:2px}
+/* Data table */
+.dtw{overflow-x:auto;max-height:460px;overflow-y:auto;border-radius:var(--rs);border:1px solid var(--border)}
+.dtw::-webkit-scrollbar{width:4px;height:4px}
+.dtw::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+.dt{width:100%;border-collapse:collapse;font-size:13px}
+.dt th{background:var(--bg2);padding:10px 12px;text-align:left;font-weight:600;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.5px;position:sticky;top:0;z-index:2;border-bottom:1px solid var(--border)}
+.dt td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
+.dt tr:hover td{background:var(--card2)}
+.dt .tth{width:36px;height:36px;border-radius:6px;object-fit:cover;border:1px solid var(--border)}
+.dt .tn{font-weight:600}
+.dt .tc{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)}
 
-.charts-row{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px}
-.chart-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px}
-.chart-wrap h3{font-size:14px;font-weight:600;margin-bottom:14px;color:var(--fg-muted)}
+/* Status pills */
+.sp{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;display:inline-block}
+.sp-ok{background:var(--okg);color:var(--ok)}
+.sp-err{background:var(--errg);color:var(--err)}
+.sp-warn{background:var(--ag);color:var(--accent)}
+.sp-info{background:var(--infog);color:var(--info)}
+.sp-mute{background:rgba(100,116,139,.12);color:var(--muted)}
 
-.filter-bar{display:flex;flex-wrap:wrap;gap:10px;align-items:end;margin-bottom:14px}
-.filter-bar .input-group{margin-bottom:0;flex:1;min-width:140px}
-.filter-bar .input-group input,.filter-bar .input-group select{font-size:13px;padding:10px 12px 10px 38px}
-.filter-bar .input-group i{left:12px;font-size:12px}
-.filter-actions{display:flex;gap:8px;flex-shrink:0}
+/* Filter bar */
+.fb{display:flex;flex-wrap:wrap;gap:10px;align-items:end;margin-bottom:14px}
+.fb .ig{margin-bottom:0;flex:1;min-width:130px}
+.fb .ig input,.fb .ig select{font-size:13px;padding:10px 12px 10px 38px}
+.fb .ig i{left:12px;font-size:12px}
 
-.data-table-wrap{overflow-x:auto;max-height:420px;overflow-y:auto;border-radius:var(--radius-sm);border:1px solid var(--border)}
-.data-table-wrap::-webkit-scrollbar{width:4px;height:4px}
-.data-table-wrap::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
-.data-table{width:100%;border-collapse:collapse;font-size:13px}
-.data-table th{background:var(--bg2);padding:10px 12px;text-align:left;font-weight:600;color:var(--fg-muted);font-size:11px;text-transform:uppercase;letter-spacing:.5px;position:sticky;top:0;z-index:2;border-bottom:1px solid var(--border)}
-.data-table td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
-.data-table tr:hover td{background:var(--card-hover)}
-.data-table .tbl-thumb{width:36px;height:36px;border-radius:6px;object-fit:cover;border:1px solid var(--border)}
-.data-table .tbl-name{font-weight:600}
-.data-table .tbl-coords{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--fg-muted)}
-.tbl-type-in{color:var(--success);font-weight:600}
-.tbl-type-out{color:var(--danger);font-weight:600}
-.btn-view-photo{background:none;border:1px solid var(--border);color:var(--fg-muted);padding:5px 8px;border-radius:6px;cursor:pointer;font-size:12px;transition:all .2s}
-.btn-view-photo:hover{border-color:var(--accent);color:var(--accent)}
+/* Form grid */
+.fg{display:grid;gap:10px;margin-bottom:16px}
+.fg-2{grid-template-columns:1fr 1fr}
+.fg-3{grid-template-columns:repeat(3,1fr)}
+.fg-4{grid-template-columns:repeat(4,1fr)}
 
-/* Add employee row */
-.add-emp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:14px}
-.add-emp-grid .input-group{margin-bottom:0}
+/* Calendar */
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:16px}
+.cal-hd{text-align:center;font-size:11px;font-weight:600;color:var(--muted);padding:6px 0;text-transform:uppercase}
+.cal-cell{aspect-ratio:1;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:13px;background:var(--bg2);border:1px solid transparent;transition:all .2s;position:relative}
+.cal-cell.empty{background:transparent;border:none}
+.cal-cell.today{border-color:var(--accent)}
+.cal-cell .cal-dot{width:6px;height:6px;border-radius:50%;margin-top:2px}
+.cal-cell .cal-dot.ok{background:var(--ok)}
+.cal-cell .cal-dot.err{background:var(--err)}
+.cal-cell .cal-dot.warn{background:var(--accent)}
+.cal-cell .cal-dot.info{background:var(--info)}
+.cal-cell .cal-dot.mute{background:var(--muted);opacity:.3}
 
-/* ===== MODALS ===== */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:100;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(8px)}
-.modal-overlay.open{display:flex}
-.modal{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;width:100%;max-width:440px;animation:mIn .4s cubic-bezier(.16,1,.3,1)}
-@keyframes mIn{from{opacity:0;transform:scale(.92) translateY(20px)}to{opacity:1;transform:none}}
-.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
-.modal-header h3{font-size:16px;font-weight:600;display:flex;align-items:center;gap:8px}
-.modal-close{width:32px;height:32px;border-radius:8px;border:none;background:var(--bg2);color:var(--fg-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;font-size:14px}
-.modal-close:hover{background:var(--danger-glow);color:var(--danger)}
-.modal video{width:100%;border-radius:var(--radius-sm);background:#000;margin-bottom:14px}
-.modal-actions{display:flex;gap:10px}
-.modal-actions .btn{flex:1}
-.modal-photo{width:100%;border-radius:var(--radius-sm);max-height:60vh;object-fit:contain;background:#000}
+/* Payslip card */
+.ps-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rs);padding:16px;margin-bottom:10px;cursor:pointer;transition:all .25s}
+.ps-card:hover{border-color:rgba(232,168,48,.3);transform:translateY(-1px)}
+.ps-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.ps-month{font-weight:600;font-size:15px}
+.ps-amount{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:500;color:var(--ok)}
+.ps-meta{display:flex;gap:16px;font-size:12px;color:var(--muted)}
+.ps-rows{display:grid;grid-template-columns:1fr 1fr;gap:4px 16px;margin-top:10px;font-size:13px}
+.ps-rows span:nth-child(odd){color:var(--muted)}
+.ps-rows span:nth-child(even){text-align:right;font-family:'JetBrains Mono',monospace}
+.ps-rows .total{color:var(--fg);font-weight:600;border-top:1px solid var(--border);padding-top:6px;margin-top:4px;grid-column:1/-1}
+
+/* Charts */
+.ch-row{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px}
+.ch-w{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px}
+.ch-w h3{font-size:14px;font-weight:600;margin-bottom:14px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.ch-w h3 i{color:var(--accent)}
+
+/* Modal */
+.mo{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:100;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(8px)}
+.mo.open{display:flex}
+.mc{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;animation:mI .4s cubic-bezier(.16,1,.3,1)}
+.mc::-webkit-scrollbar{width:4px}
+.mc::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+@keyframes mI{from{opacity:0;transform:scale(.92) translateY(20px)}to{opacity:1;transform:none}}
+.mh{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.mh h3{font-size:16px;font-weight:600;display:flex;align-items:center;gap:8px}
+.mx{width:32px;height:32px;border-radius:8px;border:none;background:var(--bg2);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;font-size:14px}
+.mx:hover{background:var(--errg);color:var(--err)}
+.ma{display:flex;gap:10px;margin-top:16px}
+.ma .btn{flex:1}
+
+/* Inline edit row */
+.ile-row{display:flex;gap:6px;align-items:center}
+.ile-row select,.ile-row input{padding:7px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--fg);font-family:inherit;font-size:13px;outline:none}
+.ile-row select:focus,.ile-row input:focus{border-color:var(--accent)}
+.ile-row input{width:120px}
+
+/* Action icons */
+.ai{width:30px;height:30px;border-radius:6px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:12px;transition:all .2s}
+.ai:hover{border-color:var(--accent);color:var(--accent)}
+.ai.del:hover{border-color:var(--err);color:var(--err)}
 
 /* Responsive */
-@media(max-width:768px){
-  .admin-stats{grid-template-columns:repeat(2,1fr)}
-  .charts-row{grid-template-columns:1fr}
-  .filter-bar{flex-direction:column}
-  .filter-bar .input-group{min-width:100%}
-  .filter-actions{width:100%}
-  .filter-actions .btn{flex:1}
-  .add-emp-grid{grid-template-columns:1fr}
-}
-@media(max-width:480px){
-  .topbar{padding:0 12px;height:54px}
-  .topbar-brand span{display:none}
-  .user-name{display:none}
-  .admin-stats{grid-template-columns:repeat(2,1fr);gap:8px}
-  .admin-stat .stat-val{font-size:20px}
-  .clock-time{font-size:34px}
-  .stats-row{gap:6px}
-  .stat-value{font-size:18px}
-  .toast-container{top:10px;right:10px;left:10px}
-  .toast{max-width:100%}
-}
+@media(max-width:768px){.srow-4{grid-template-columns:repeat(2,1fr)}.ch-row{grid-template-columns:1fr}.fb{flex-direction:column}.fb .ig{min-width:100%}.fg-2,.fg-3,.fg-4{grid-template-columns:1fr}.ps-rows{grid-template-columns:1fr}.ps-rows span:nth-child(even){text-align:left}}
+@media(max-width:480px){.topbar{padding:0 12px;height:52px}.tb-brand span,.uname{display:none}.srow-4{gap:6px}.asi .sv{font-size:20px}.clk-t{font-size:32px}.tabs{padding:10px 12px 0}.tab{padding:8px 12px;font-size:12px}.tc{display:flex-wrap:wrap}.ile-row input{width:80px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 </style>
 </head>
@@ -234,1025 +260,153 @@ body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--fg)
 
 <div class="ambient"><div class="orb"></div><div class="orb"></div><div class="orb"></div></div>
 <div class="grain"></div>
-<div class="toast-container" id="toastContainer"></div>
+<div class="tc" id="tc"></div>
 
 <!-- Photo Modal -->
-<div class="modal-overlay" id="photoModal">
-  <div class="modal">
-    <div class="modal-header">
-      <h3><i class="fa-solid fa-image" style="color:var(--accent)"></i> Attendance Photo</h3>
-      <button class="modal-close" onclick="closePhotoModal()" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
-    </div>
-    <img id="photoModalImg" class="modal-photo" alt="Attendance photo">
-  </div>
-</div>
+<div class="mo" id="photoMo"><div class="mc"><div class="mh"><h3><i class="fa-solid fa-image" style="color:var(--accent)"></i> Photo</h3><button class="mx" onclick="closeMo('photoMo')"><i class="fa-solid fa-xmark"></i></button></div><img id="photoMoImg" style="width:100%;border-radius:var(--rs);max-height:65vh;object-fit:contain;background:#000" alt="Photo"></div></div>
+
+<!-- Payslip Detail Modal -->
+<div class="mo" id="psMo"><div class="mc" style="max-width:440px"><div class="mh"><h3><i class="fa-solid fa-file-invoice-dollar" style="color:var(--accent)"></i> <span id="psMoTitle">Payslip</span></h3><button class="mx" onclick="closeMo('psMo')"><i class="fa-solid fa-xmark"></i></button></div><div id="psMoBody"></div></div></div>
 
 <!-- Camera Modal -->
-<div class="modal-overlay" id="cameraModal">
-  <div class="modal">
-    <div class="modal-header">
-      <h3><i class="fa-solid fa-camera" style="color:var(--accent)"></i> Take Selfie</h3>
-      <button class="modal-close" onclick="closeCameraModal()" aria-label="Close camera"><i class="fa-solid fa-xmark"></i></button>
-    </div>
-    <video id="modalVideo" autoplay playsinline muted style="transform:scaleX(-1)"></video>
-    <canvas id="captureCanvas" class="hidden"></canvas>
-    <div class="modal-actions">
-      <button class="btn btn-capture" onclick="closeCameraModal()"><i class="fa-solid fa-arrow-left"></i> Cancel</button>
-      <button class="btn btn-punch-in" onclick="captureSelfie()"><i class="fa-solid fa-camera"></i> Capture</button>
-    </div>
-  </div>
-</div>
+<div class="mo" id="camMo"><div class="mc" style="max-width:440px"><div class="mh"><h3><i class="fa-solid fa-camera" style="color:var(--accent)"></i> Take Selfie</h3><button class="mx" onclick="closeCam()"><i class="fa-solid fa-xmark"></i></button></div><video id="camVid" autoplay playsinline muted style="width:100%;border-radius:var(--rs);background:#000;margin-bottom:14px;transform:scaleX(-1)"></video><canvas id="capCvs" class="hidden"></canvas><div class="ma"><button class="btn btn-sec" onclick="closeCam()"><i class="fa-solid fa-arrow-left"></i> Cancel</button><button class="btn btn-ok" onclick="captureSelfie()"><i class="fa-solid fa-camera"></i> Capture</button></div></div></div>
 
-<!-- ===== LOGIN VIEW ===== -->
-<section id="loginView" class="view">
-  <div class="login-wrap">
-    <div class="login-card">
-      <div class="logo-icon"><i class="fa-solid fa-fingerprint"></i></div>
-      <h1>Attendance System</h1>
-      <p class="sub">Sign in to continue</p>
-      <div class="input-group">
-        <input type="text" id="loginUser" placeholder="Username" autocomplete="off">
-        <i class="fa-solid fa-user"></i>
-      </div>
-      <div class="input-group">
-        <input type="password" id="loginPass" placeholder="Password">
-        <i class="fa-solid fa-lock"></i>
-      </div>
-      <button class="btn btn-login" id="btnLogin" onclick="LoginCtrl.submit()">
-        <i class="fa-solid fa-right-to-bracket"></i> Sign In
-      </button>
-      <div class="demo-hint">
-        <strong>Admin:</strong> admin / admin123<br>
-        <strong>Employee:</strong> john / john123 &nbsp;or&nbsp; sarah / sarah123
-      </div>
-    </div>
+<!-- Employee Add/Edit Modal -->
+<div class="mo" id="empMo"><div class="mc">
+  <div class="mh"><h3 id="empMoTitle"><i class="fa-solid fa-user-plus" style="color:var(--accent)"></i> Add Employee</h3><button class="mx" onclick="closeMo('empMo')"><i class="fa-solid fa-xmark"></i></button></div>
+  <div class="fg fg-2">
+    <div class="ig"><input id="ef_name" placeholder="Full Name"><i class="fa-solid fa-user"></i></div>
+    <div class="ig"><input id="ef_username" placeholder="Username"><i class="fa-solid fa-at"></i></div>
+    <div class="ig"><input id="ef_password" type="password" placeholder="Password"><i class="fa-solid fa-lock"></i></div>
+    <div class="ig"><input id="ef_email" type="email" placeholder="Email"><i class="fa-solid fa-envelope"></i></div>
+    <div class="ig"><input id="ef_phone" placeholder="Phone Number"><i class="fa-solid fa-phone"></i></div>
+    <div class="ig"><input id="ef_dob" type="date" placeholder="Date of Birth"><i class="fa-solid fa-cake-candles"></i></div>
+    <div class="ig"><select id="ef_dept"><option value="Engineering">Engineering</option><option value="Design">Design</option><option value="Marketing">Marketing</option><option value="HR">HR</option><option value="Finance">Finance</option><option value="Operations">Operations</option></select><i class="fa-solid fa-building"></i></div>
+    <div class="ig"><input id="ef_position" placeholder="Position/Role"><i class="fa-solid fa-briefcase"></i></div>
+    <div class="ig"><input id="ef_salary" type="number" placeholder="Monthly Salary"><i class="fa-solid fa-dollar-sign"></i></div>
+    <div class="ig"><input id="ef_join" type="date" placeholder="Join Date"><i class="fa-solid fa-calendar-check"></i></div>
   </div>
+  <div class="ig"><textarea id="ef_address" placeholder="Address" rows="2"></textarea><i class="fa-solid fa-location-dot" style="top:18px"></i></div>
+  <input type="hidden" id="ef_id">
+  <div class="ma"><button class="btn btn-sec" onclick="closeMo('empMo')">Cancel</button><button class="btn btn-pri" id="empMoSave" onclick="AdmEmp.save()"><i class="fa-solid fa-check"></i> Save</button></div>
+</div></div>
+
+<!-- ===== LOGIN ===== -->
+<section id="vLogin" class="view">
+<div class="lwrap"><div class="lcard">
+  <div class="logo-i"><i class="fa-solid fa-fingerprint"></i></div>
+  <h1 style="font-size:24px;font-weight:700;margin-bottom:4px">Attendance & Payroll</h1>
+  <p style="color:var(--muted);font-size:14px;margin-bottom:28px">Sign in to continue</p>
+  <div class="ig"><input id="li_user" placeholder="Username" autocomplete="off"><i class="fa-solid fa-user"></i></div>
+  <div class="ig"><input id="li_pass" type="password" placeholder="Password"><i class="fa-solid fa-lock"></i></div>
+  <button class="btn btn-pri btn-f" id="btnLi" onclick="LogIn.go()"><i class="fa-solid fa-right-to-bracket"></i> Sign In</button>
+  <div class="demo-h"><strong>Admin:</strong> admin / admin123<br><strong>Employee:</strong> john / john123 &nbsp;or&nbsp; sarah / sarah123</div>
+</div></div>
 </section>
 
 <!-- ===== EMPLOYEE VIEW ===== -->
-<section id="employeeView" class="view hidden">
-  <nav class="topbar">
-    <div class="topbar-brand"><i class="fa-solid fa-fingerprint"></i><span>Attendance</span></div>
-    <div class="topbar-right">
-      <span class="role-badge employee">Employee</span>
-      <span class="user-name" id="empUserName"></span>
-      <button class="btn-logout" onclick="Auth.logout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+<section id="vEmp" class="view hidden">
+<nav class="topbar"><div class="tb-brand"><i class="fa-solid fa-fingerprint"></i><span>Attendance</span></div><div class="tb-right"><span class="badge badge-emp">Employee</span><span class="uname" id="eUname"></span><button class="btn-lo" onclick="Auth.out()"><i class="fa-solid fa-right-from-bracket"></i> Logout</button></div></nav>
+<div class="tabs" id="eTabs">
+  <button class="tab on" data-t="ePunch">Clock</button>
+  <button class="tab" data-t="eAtt">Attendance</button>
+  <button class="tab" data-t="ePay">Payslips</button>
+</div>
+<div style="max-width:520px;margin:0 auto;padding:20px 16px 60px">
+  <!-- Punch Tab -->
+  <div class="tpanel on" id="ePunch">
+    <div class="clk-card"><div class="clk-t" id="eClk">--:--:--</div><div class="clk-d" id="eDate"></div></div>
+    <div class="srow srow-3"><div class="si"><div class="sv" id="esT">0</div><div class="sl">Today</div></div><div class="si"><div class="sv" id="esW">0</div><div class="sl">This Week</div></div><div class="si"><div class="sv" id="esA">0</div><div class="sl">All Time</div></div></div>
+    <div class="card"><div class="ct"><i class="fa-solid fa-clock"></i> Clock In / Out</div>
+      <div class="cam-area" id="camArea"><div class="cam-ph" id="camPh"><i class="fa-solid fa-user-circle"></i><span>Capture a selfie for verification</span></div><img id="selfiePrev" class="hidden" alt="Selfie"><div class="cam-fr" id="camFr"></div></div>
+      <button class="btn btn-sec btn-f" onclick="openCam()" style="margin-bottom:10px"><i class="fa-solid fa-camera"></i> Take Selfie</button>
+      <button class="btn btn-ok btn-f" id="btnPunch" onclick="Emp.punch()"><i class="fa-solid fa-right-to-bracket"></i><span id="pTxt">Punch In</span></button>
+      <div style="text-align:center"><div class="st-badge idle" id="stB"><span class="st-dot"></span><span id="stT">Idle</span></div></div>
+      <div class="loc-info hidden" id="locI"><i class="fa-solid fa-location-dot"></i><span class="coords" id="locC"></span></div>
     </div>
-  </nav>
-  <main class="emp-content">
-    <div class="clock-card">
-      <div class="clock-time" id="clockTime">--:--:--</div>
-      <div class="clock-date" id="clockDate"></div>
-    </div>
-    <div class="stats-row">
-      <div class="stat-item"><div class="stat-value" id="empStatToday">0</div><div class="stat-label">Today</div></div>
-      <div class="stat-item"><div class="stat-value" id="empStatWeek">0</div><div class="stat-label">This Week</div></div>
-      <div class="stat-item"><div class="stat-value" id="empStatTotal">0</div><div class="stat-label">All Time</div></div>
-    </div>
-    <div class="card">
-      <div class="card-title"><i class="fa-solid fa-clock"></i> Clock In / Out</div>
-      <div class="camera-area" id="cameraArea">
-        <div class="placeholder" id="camPlaceholder"><i class="fa-solid fa-user-circle"></i><span>Capture a selfie for verification</span></div>
-        <img id="selfiePreview" class="hidden" alt="Selfie">
-        <div class="cam-frame" id="camFrame"></div>
+    <div class="card"><div class="ct"><i class="fa-solid fa-list-check"></i> Recent Punches</div><div class="ll" id="eLog"><div class="es"><i class="fa-solid fa-clipboard-list"></i><p>No records yet</p></div></div></div>
+  </div>
+  <!-- Attendance Tab -->
+  <div class="tpanel" id="eAtt">
+    <div class="card"><div class="ct"><i class="fa-solid fa-calendar-days"></i> Attendance Overview</div>
+      <div class="fb"><div class="ig"><input type="month" id="eAttMon"><i class="fa-solid fa-calendar"></i></div></div>
+      <div class="srow srow-4" id="eAttStats"></div>
+      <div class="cal-grid" id="eCalGrid"></div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-bottom:16px">
+        <span><span class="cal-dot ok" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--ok);margin-right:4px"></span>Present</span>
+        <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--err);margin-right:4px"></span>Absent</span>
+        <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--accent);margin-right:4px"></span>Half Day</span>
+        <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--info);margin-right:4px"></span>Leave</span>
       </div>
-      <button class="btn btn-capture" onclick="openCameraModal()" style="margin-bottom:10px"><i class="fa-solid fa-camera"></i> Take Selfie</button>
-      <button class="btn btn-punch-in" id="btnPunch" onclick="EmpCtrl.punch()"><i class="fa-solid fa-right-to-bracket"></i><span id="btnPunchText">Punch In</span></button>
-      <div style="text-align:center">
-        <div class="status-badge idle" id="statusBadge"><span class="status-dot"></span><span id="statusText">Idle</span></div>
-      </div>
-      <div class="location-info hidden" id="locationInfo"><i class="fa-solid fa-location-dot"></i><span class="coords" id="locationCoords"></span></div>
+      <div class="dtw" id="eAttTable"></div>
     </div>
-    <div class="card">
-      <div class="card-title"><i class="fa-solid fa-list-check"></i> My Records</div>
-      <div class="log-list" id="empLogList"><div class="empty-state"><i class="fa-solid fa-clipboard-list"></i><p>No records yet</p></div></div>
-    </div>
-  </main>
+  </div>
+  <!-- Payslips Tab -->
+  <div class="tpanel" id="ePay"><div class="ct" style="padding:0 0 14px"><i class="fa-solid fa-file-invoice-dollar"></i> My Payslips</div><div id="ePayList"></div></div>
+</div>
 </section>
 
 <!-- ===== ADMIN VIEW ===== -->
-<section id="adminView" class="view hidden">
-  <nav class="topbar">
-    <div class="topbar-brand"><i class="fa-solid fa-fingerprint"></i><span>Admin Dashboard</span></div>
-    <div class="topbar-right">
-      <span class="role-badge admin">Admin</span>
-      <span class="user-name" id="admUserName"></span>
-      <button class="btn-logout" onclick="Auth.logout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+<section id="vAdm" class="view hidden">
+<nav class="topbar"><div class="tb-brand"><i class="fa-solid fa-fingerprint"></i><span>Admin Panel</span></div><div class="tb-right"><span class="badge badge-admin">Admin</span><span class="uname" id="aUname"></span><button class="btn-lo" onclick="Auth.out()"><i class="fa-solid fa-right-from-bracket"></i> Logout</button></div></nav>
+<div class="tabs" id="aTabs">
+  <button class="tab on" data-t="aDash">Dashboard</button>
+  <button class="tab" data-t="aEmp">Employees</button>
+  <button class="tab" data-t="aLeave">Leave & Attendance</button>
+  <button class="tab" data-t="aPay">Payments</button>
+</div>
+<div style="max-width:940px;margin:0 auto;padding:20px 16px 60px">
+  <!-- Dashboard Tab -->
+  <div class="tpanel on" id="aDash">
+    <div class="srow srow-4" id="aStats"></div>
+    <div class="ch-row"><div class="ch-w"><h3><i class="fa-solid fa-chart-bar"></i> Daily Punches (7 Days)</h3><canvas id="barCh"></canvas></div><div class="ch-w"><h3><i class="fa-solid fa-chart-pie"></i> Today's Ratio</h3><canvas id="dnCh"></canvas></div></div>
+    <div class="card"><div class="ct"><i class="fa-solid fa-table-list"></i> Recent Activity</div><div class="dtw" id="aRecent"></div></div>
+  </div>
+  <!-- Employees Tab -->
+  <div class="tpanel" id="aEmp">
+    <div class="card"><div class="ct" style="justify-content:space-between"><span><i class="fa-solid fa-users-gear"></i> Employee Management</span><button class="btn btn-pri btn-sm" onclick="AdmEmp.openAdd()"><i class="fa-solid fa-plus"></i> Add Employee</button></div>
+      <div class="fb"><div class="ig" style="min-width:200px"><input id="empSearch" placeholder="Search employees..."><i class="fa-solid fa-magnifying-glass"></i></div><div class="ig" style="min-width:150px"><select id="empDeptF"><option value="">All Departments</option><option>Engineering</option><option>Design</option><option>Marketing</option><option>HR</option><option>Finance</option><option>Operations</option></select><i class="fa-solid fa-filter"></i></div></div>
+      <div class="dtw" id="empTable"></div>
     </div>
-  </nav>
-  <main class="admin-content">
-    <!-- Stats -->
-    <div class="admin-stats" id="adminStats"></div>
-    <!-- Charts -->
-    <div class="charts-row">
-      <div class="chart-wrap"><h3><i class="fa-solid fa-chart-bar" style="color:var(--accent);margin-right:6px"></i> Daily Punches (Last 7 Days)</h3><canvas id="barChart"></canvas></div>
-      <div class="chart-wrap"><h3><i class="fa-solid fa-chart-pie" style="color:var(--accent);margin-right:6px"></i> Today's Ratio</h3><canvas id="doughnutChart"></canvas></div>
-    </div>
-    <!-- Filters & Table -->
-    <div class="card">
-      <div class="card-title" style="justify-content:space-between">
-        <span><i class="fa-solid fa-table-list"></i> All Records</span>
-        <div class="filter-actions">
-          <button class="btn btn-ghost btn-sm" onclick="AdminCtrl.exportCSV()"><i class="fa-solid fa-file-csv"></i> CSV</button>
-          <button class="btn btn-ghost btn-sm" onclick="AdminCtrl.exportJSON()"><i class="fa-solid fa-file-code"></i> JSON</button>
-        </div>
+  </div>
+  <!-- Leave & Attendance Tab -->
+  <div class="tpanel" id="aLeave">
+    <div class="card"><div class="ct"><i class="fa-solid fa-calendar-check"></i> Mark Daily Attendance</div>
+      <div class="fb">
+        <div class="ig"><input type="date" id="lvDate"><i class="fa-solid fa-calendar-day"></i></div>
+        <button class="btn btn-gh btn-sm" onclick="AdmLv.allPresent()"><i class="fa-solid fa-check-double"></i> All Present</button>
+        <button class="btn btn-gh btn-sm" onclick="AdmLv.allAbsent()"><i class="fa-solid fa-xmark"></i> All Absent</button>
+        <button class="btn btn-pri btn-sm" onclick="AdmLv.save()"><i class="fa-solid fa-floppy-disk"></i> Save</button>
       </div>
-      <div class="filter-bar">
-        <div class="input-group"><input type="date" id="filterFrom"><i class="fa-solid fa-calendar"></i></div>
-        <div class="input-group"><input type="date" id="filterTo"><i class="fa-solid fa-calendar-check"></i></div>
-        <div class="input-group"><input type="text" id="filterSearch" placeholder="Search name..."><i class="fa-solid fa-magnifying-glass"></i></div>
-        <div class="input-group">
-          <select id="filterType"><option value="">All Types</option><option value="in">Punch In</option><option value="out">Punch Out</option></select>
-          <i class="fa-solid fa-filter"></i>
-        </div>
-        <div class="filter-actions"><button class="btn btn-ghost btn-sm" onclick="AdminCtrl.applyFilters()"><i class="fa-solid fa-rotate"></i></button></div>
-      </div>
-      <div class="data-table-wrap" id="tableWrap"></div>
+      <div class="dtw" id="lvTable"></div>
     </div>
-    <!-- Add Employee -->
-    <div class="card">
-      <div class="card-title"><i class="fa-solid fa-user-plus"></i> Add Employee</div>
-      <div class="add-emp-grid">
-        <div class="input-group"><input type="text" id="newName" placeholder="Full Name"><i class="fa-solid fa-user"></i></div>
-        <div class="input-group"><input type="text" id="newUsername" placeholder="Username"><i class="fa-solid fa-at"></i></div>
-        <div class="input-group"><input type="password" id="newPassword" placeholder="Password"><i class="fa-solid fa-lock"></i></div>
-        <div class="input-group">
-          <select id="newDept"><option value="Engineering">Engineering</option><option value="Design">Design</option><option value="Marketing">Marketing</option><option value="HR">HR</option><option value="Finance">Finance</option></select>
-          <i class="fa-solid fa-building"></i>
-        </div>
-      </div>
-      <button class="btn btn-login" onclick="AdminCtrl.addEmployee()"><i class="fa-solid fa-plus"></i> Add Employee</button>
+    <div class="card"><div class="ct"><i class="fa-solid fa-chart-column"></i> Monthly Summary</div>
+      <div class="fb"><div class="ig"><input type="month" id="lvMon"><i class="fa-solid fa-calendar"></i></div></div>
+      <div class="dtw" id="lvSummary"></div>
     </div>
-  </main>
+  </div>
+  <!-- Payments Tab -->
+  <div class="tpanel" id="aPay">
+    <div class="card"><div class="ct"><i class="fa-solid fa-money-bill-wave"></i> Payroll Processing</div>
+      <div class="fb">
+        <div class="ig"><select id="payMon"></select><i class="fa-solid fa-calendar"></i></div>
+        <button class="btn btn-pri btn-sm" onclick="AdmPay.gen()"><i class="fa-solid fa-calculator"></i> Generate Payroll</button>
+        <button class="btn btn-ok btn-sm" onclick="AdmPay.saveAll()"><i class="fa-solid fa-floppy-disk"></i> Save All</button>
+      </div>
+      <div class="dtw" id="payTable"></div>
+    </div>
+    <div class="card"><div class="ct"><i class="fa-solid fa-receipt"></i> Payment History</div>
+      <div class="dtw" id="payHist"></div>
+    </div>
+  </div>
+</div>
 </section>
 
 <script>
 /* ============================================================
-   DATABASE LAYER — IndexedDB with promise-based API
+   DATABASE — IndexedDB with promise API
    ============================================================ */
-const DB = {
-  db: null,
-
-  init() {
-    return new Promise((resolve, reject) => {
-      const req = indexedDB.open('AttendanceDB', 1);
-      req.onupgradeneeded = (e) => {
-        const db = e.target.result;
-        if (!db.objectStoreNames.contains('users')) {
-          const s = db.createObjectStore('users', { keyPath: 'id', autoIncrement: true });
-          s.createIndex('username', 'username', { unique: true });
-        }
-        if (!db.objectStoreNames.contains('records')) {
-          const s = db.createObjectStore('records', { keyPath: 'id', autoIncrement: true });
-          s.createIndex('userId', 'userId');
-          s.createIndex('time', 'time');
-        }
-        if (!db.objectStoreNames.contains('sessions')) {
-          db.createObjectStore('sessions', { keyPath: 'key' });
-        }
-      };
-      req.onsuccess = (e) => { DB.db = e.target.result; resolve(); };
-      req.onerror = (e) => reject(e.target.error);
-    });
-  },
-
-  _tx(store, mode = 'readonly') {
-    const tx = DB.db.transaction(store, mode);
-    return tx.objectStore(store);
-  },
-
-  add(store, data) {
-    return new Promise((resolve, reject) => {
-      const req = DB._tx(store, 'readwrite').add(data);
-      req.onsuccess = () => resolve(req.result);
-      req.onerror = () => reject(req.error);
-    });
-  },
-
-  get(store, key) {
-    return new Promise((resolve, reject) => {
-      const req = DB._tx(store).get(key);
-      req.onsuccess = () => resolve(req.result);
-      req.onerror = () => reject(req.error);
-    });
-  },
-
-  getAll(store) {
-    return new Promise((resolve, reject) => {
-      const req = DB._tx(store).getAll();
-      req.onsuccess = () => resolve(req.result);
-      req.onerror = () => reject(req.error);
-    });
-  },
-
-  put(store, data) {
-    return new Promise((resolve, reject) => {
-      const req = DB._tx(store, 'readwrite').put(data);
-      req.onsuccess = () => resolve(req.result);
-      req.onerror = () => reject(req.error);
-    });
-  },
-
-  del(store, key) {
-    return new Promise((resolve, reject) => {
-      const req = DB._tx(store, 'readwrite').delete(key);
-      req.onsuccess = () => resolve();
-      req.onerror = () => reject(req.error);
-    });
-  },
-
-  getByIndex(store, idx, val) {
-    return new Promise((resolve, reject) => {
-      const req = DB._tx(store).index(idx).getAll(val);
-      req.onsuccess = () => resolve(req.result);
-      req.onerror = () => reject(req.error);
-    });
-  },
-
-  clear(store) {
-    return new Promise((resolve, reject) => {
-      const req = DB._tx(store, 'readwrite').clear();
-      req.onsuccess = () => resolve();
-      req.onerror = () => reject(req.error);
-    });
-  }
-};
-
-/* ============================================================
-   API SERVICE LAYER — Simulated backend endpoints
-   ============================================================ */
-const API = {
-  async login(username, password) {
-    await delay(300); // simulate network latency
-    const user = (await DB.getByIndex('users', 'username', username))[0];
-    if (!user || user.password !== password) throw new Error('Invalid username or password');
-    const token = 'tok_' + Date.now() + '_' + Math.random().toString(36).slice(2);
-    await DB.put('sessions', { key: 'current', userId: user.id, token, createdAt: new Date().toISOString() });
-    const { password: _, ...safe } = user;
-    return { user: safe, token };
-  },
-
-  async getSession() {
-    const session = await DB.get('sessions', 'current');
-    if (!session) return null;
-    const user = await DB.get('users', session.userId);
-    if (!user) return null;
-    const { password: _, ...safe } = user;
-    return { ...session, user: safe };
-  },
-
-  async logout() {
-    await DB.del('sessions', 'current');
-  },
-
-  async punchIn(userId, photo, lat, lng) {
-    await delay(200);
-    const recs = await DB.getByIndex('records', 'userId', userId);
-    const today = new Date().toDateString();
-    const last = recs.filter(r => new Date(r.time).toDateString() === today)
-                     .sort((a, b) => new Date(b.time) - new Date(a.time))[0];
-    if (last && last.type === 'in') throw new Error('Already punched in today');
-    const record = { userId, type: 'in', time: new Date().toISOString(), photo, lat, lng };
-    const id = await DB.add('records', record);
-    return { ...record, id };
-  },
-
-  async punchOut(userId, photo, lat, lng) {
-    await delay(200);
-    const recs = await DB.getByIndex('records', 'userId', userId);
-    const today = new Date().toDateString();
-    const last = recs.filter(r => new Date(r.time).toDateString() === today)
-                     .sort((a, b) => new Date(b.time) - new Date(a.time))[0];
-    if (!last || last.type !== 'in') throw new Error('You need to punch in first');
-    const record = { userId, type: 'out', time: new Date().toISOString(), photo, lat, lng };
-    const id = await DB.add('records', record);
-    return { ...record, id };
-  },
-
-  async getMyRecords(userId) {
-    const recs = await DB.getByIndex('records', 'userId', userId);
-    return recs.sort((a, b) => new Date(b.time) - new Date(a.time));
-  },
-
-  async getUserStatus(userId) {
-    const recs = await DB.getByIndex('records', 'userId', userId);
-    const today = new Date().toDateString();
-    const todayRecs = recs.filter(r => new Date(r.time).toDateString() === today)
-                          .sort((a, b) => new Date(b.time) - new Date(a.time));
-    if (todayRecs.length === 0) return 'idle';
-    return todayRecs[0].type === 'in' ? 'punched-in' : 'idle';
-  },
-
-  async getAllRecords(filters = {}) {
-    let records = await DB.getAll('records');
-    const users = await API.getUsers();
-    const userMap = {};
-    users.forEach(u => userMap[u.id] = u);
-
-    if (filters.userId) records = records.filter(r => r.userId === filters.userId);
-    if (filters.type) records = records.filter(r => r.type === filters.type);
-    if (filters.dateFrom) records = records.filter(r => new Date(r.time) >= new Date(filters.dateFrom));
-    if (filters.dateTo) {
-      const to = new Date(filters.dateTo); to.setHours(23, 59, 59, 999);
-      records = records.filter(r => new Date(r.time) <= to);
-    }
-    if (filters.search) {
-      const q = filters.search.toLowerCase();
-      records = records.filter(r => {
-        const u = userMap[r.userId];
-        return u && u.name.toLowerCase().includes(q);
-      });
-    }
-
-    return records
-      .sort((a, b) => new Date(b.time) - new Date(a.time))
-      .map(r => ({ ...r, userName: userMap[r.userId]?.name || 'Unknown', userDept: userMap[r.userId]?.department || '' }));
-  },
-
-  async getStats() {
-    const records = await DB.getAll('records');
-    const users = await DB.getAll('users');
-    const today = new Date().toDateString();
-    const weekStart = new Date(); weekStart.setDate(weekStart.getDate() - weekStart.getDay()); weekStart.setHours(0,0,0,0);
-
-    const todayRecs = records.filter(r => new Date(r.time).toDateString() === today);
-    const weekRecs = records.filter(r => new Date(r.time) >= weekStart);
-    const todayIn = todayRecs.filter(r => r.type === 'in').length;
-    const todayOut = todayRecs.filter(r => r.type === 'out').length;
-
-    // Calculate average daily punches this week
-    const daysInWeek = new Set(weekRecs.map(r => new Date(r.time).toDateString())).size || 1;
-    const avgDaily = Math.round(weekRecs.length / daysInWeek);
-
-    return {
-      total: records.length,
-      today: todayRecs.length,
-      week: weekRecs.length,
-      employees: users.filter(u => u.role === 'employee').length,
-      todayIn, todayOut, avgDaily
-    };
-  },
-
-  async getDailyPunches(days = 7) {
-    const records = await DB.getAll('records');
-    const result = [];
-    for (let i = days - 1; i >= 0; i--) {
-      const d = new Date(); d.setDate(d.getDate() - i);
-      const ds = d.toDateString();
-      const dr = records.filter(r => new Date(r.time).toDateString() === ds);
-      result.push({
-        label: d.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric' }),
-        ins: dr.filter(r => r.type === 'in').length,
-        outs: dr.filter(r => r.type === 'out').length
-      });
-    }
-    return result;
-  },
-
-  async getUsers() {
-    return (await DB.getAll('users')).map(u => { const { password: _, ...s } = u; return s; });
-  },
-
-  async addUser(data) {
-    await delay(200);
-    const existing = (await DB.getByIndex('users', 'username', data.username))[0];
-    if (existing) throw new Error('Username already exists');
-    const id = await DB.add('users', data);
-    return { ...data, id };
-  }
-};
-
-function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
-
-/* ============================================================
-   AUTH MODULE
-   ============================================================ */
-const Auth = {
-  session: null,
-
-  async restore() {
-    try {
-      this.session = await API.getSession();
-      if (this.session) Router.navigate(this.session.user.role === 'admin' ? 'admin' : 'employee');
-    } catch { this.session = null; }
-  },
-
-  async login(username, password) {
-    this.session = await API.login(username, password);
-    Router.navigate(this.session.user.role === 'admin' ? 'admin' : 'employee');
-  },
-
-  async logout() {
-    await API.logout();
-    this.session = null;
-    Router.navigate('login');
-  }
-};
-
-/* ============================================================
-   ROUTER
-   ============================================================ */
-const Router = {
-  views: ['loginView', 'employeeView', 'adminView'],
-  current: null,
-
-  navigate(view) {
-    this.views.forEach(id => document.getElementById(id).classList.add('hidden'));
-    const map = { login: 'loginView', employee: 'employeeView', admin: 'adminView' };
-    document.getElementById(map[view]).classList.remove('hidden');
-    this.current = view;
-
-    if (view === 'employee') EmpCtrl.init();
-    if (view === 'admin') AdminCtrl.init();
-  }
-};
-
-/* ============================================================
-   UTILITIES
-   ============================================================ */
-function showToast(msg, type = 'info') {
-  const c = document.getElementById('toastContainer');
-  const t = document.createElement('div');
-  t.className = `toast ${type}`;
-  const icons = { success: 'fa-circle-check', error: 'fa-circle-xmark', info: 'fa-circle-info' };
-  t.innerHTML = `<i class="fa-solid ${icons[type]||icons.info}"></i><span>${msg}</span>`;
-  c.appendChild(t);
-  setTimeout(() => { t.classList.add('removing'); setTimeout(() => t.remove(), 300); }, 3500);
-}
-
-function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
-
-function formatTime(iso) {
-  return new Date(iso).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-}
-function formatDate(iso) {
-  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-}
-
-function animateNum(el, target) {
-  const cur = parseInt(el.textContent) || 0;
-  if (cur === target) return;
-  const start = performance.now();
-  const dur = 400;
-  (function tick(now) {
-    const p = Math.min((now - start) / dur, 1);
-    const e = 1 - (1 - p) * (1 - p);
-    el.textContent = Math.round(cur + (target - cur) * e);
-    if (p < 1) requestAnimationFrame(tick);
-  })(start);
-}
-
-function generateAvatar(name) {
-  const c = document.createElement('canvas'); c.width = 96; c.height = 96;
-  const ctx = c.getContext('2d');
-  let h = 0; for (let i = 0; i < name.length; i++) h = name.charCodeAt(i) + ((h << 5) - h);
-  ctx.fillStyle = `hsl(${Math.abs(h) % 360}, 45%, 32%)`;
-  ctx.fillRect(0, 0, 96, 96);
-  ctx.fillStyle = '#fff'; ctx.font = 'bold 36px Space Grotesk, sans-serif';
-  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  ctx.fillText(name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2), 48, 50);
-  return c.toDataURL('image/jpeg', 0.7);
-}
-
-function resizeImage(dataUrl, maxW, maxH) {
-  return new Promise(resolve => {
-    const img = new Image();
-    img.onload = () => {
-      const c = document.createElement('canvas');
-      let w = img.width, h = img.height;
-      if (w > maxW) { h = h * maxW / w; w = maxW; }
-      if (h > maxH) { w = w * maxH / h; h = maxH; }
-      c.width = w; c.height = h;
-      c.getContext('2d').drawImage(img, 0, 0, w, h);
-      resolve(c.toDataURL('image/jpeg', 0.7));
-    };
-    img.src = dataUrl;
-  });
-}
-
-/* ============================================================
-   LOGIN CONTROLLER
-   ============================================================ */
-const LoginCtrl = {
-  async submit() {
-    const u = document.getElementById('loginUser').value.trim();
-    const p = document.getElementById('loginPass').value;
-    if (!u || !p) { showToast('Please enter username and password', 'error'); return; }
-    const btn = document.getElementById('btnLogin');
-    btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Signing in...';
-    try {
-      await Auth.login(u, p);
-      showToast('Welcome back!', 'success');
-      document.getElementById('loginUser').value = '';
-      document.getElementById('loginPass').value = '';
-    } catch (e) {
-      showToast(e.message, 'error');
-    } finally {
-      btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Sign In';
-    }
-  }
-};
-
-// Enter key on login fields
-document.getElementById('loginUser').addEventListener('keydown', e => { if (e.key === 'Enter') LoginCtrl.submit(); });
-document.getElementById('loginPass').addEventListener('keydown', e => { if (e.key === 'Enter') LoginCtrl.submit(); });
-
-/* ============================================================
-   EMPLOYEE CONTROLLER
-   ============================================================ */
-const EmpCtrl = {
-  punchState: 'idle',
-  capturedImage: null,
-  cameraStream: null,
-  clockInterval: null,
-
-  init() {
-    if (!Auth.session) return;
-    const u = Auth.session.user;
-    document.getElementById('empUserName').textContent = u.name;
-    this.punchState = 'idle';
-    this.capturedImage = null;
-    this._resetUI();
-    this._startClock();
-    this._loadStatus();
-    this._loadRecords();
-    this._loadStats();
-  },
-
-  _resetUI() {
-    const btn = document.getElementById('btnPunch');
-    btn.className = 'btn btn-punch-in';
-    document.getElementById('btnPunchText').textContent = 'Punch In';
-    btn.querySelector('i').className = 'fa-solid fa-right-to-bracket';
-    document.getElementById('statusBadge').className = 'status-badge idle';
-    document.getElementById('statusText').textContent = 'Idle';
-    document.getElementById('selfiePreview').classList.add('hidden');
-    document.getElementById('camPlaceholder').classList.remove('hidden');
-    document.getElementById('camFrame').classList.remove('active');
-    document.getElementById('locationInfo').classList.add('hidden');
-  },
-
-  async _loadStatus() {
-    if (!Auth.session) return;
-    try {
-      const status = await API.getUserStatus(Auth.session.user.id);
-      if (status === 'punched-in') {
-        this.punchState = 'punched-in';
-        const btn = document.getElementById('btnPunch');
-        btn.className = 'btn btn-punch-out';
-        document.getElementById('btnPunchText').textContent = 'Punch Out';
-        btn.querySelector('i').className = 'fa-solid fa-right-from-bracket';
-        document.getElementById('statusBadge').className = 'status-badge active';
-        document.getElementById('statusText').textContent = 'Clocked In';
-      }
-    } catch {}
-  },
-
-  async _loadRecords() {
-    if (!Auth.session) return;
-    const records = await API.getMyRecords(Auth.session.user.id);
-    const list = document.getElementById('empLogList');
-    if (records.length === 0) {
-      list.innerHTML = '<div class="empty-state"><i class="fa-solid fa-clipboard-list"></i><p>No records yet</p></div>';
-      return;
-    }
-    list.innerHTML = records.slice(0, 50).map(r => `
-      <div class="log-entry">
-        <img class="log-thumb" src="${r.photo}" alt="" loading="lazy">
-        <div class="log-details">
-          <div class="log-name">${escapeHtml(Auth.session.user.name)}</div>
-          <div class="log-meta">
-            <span><i class="fa-solid fa-calendar-day"></i> ${formatDate(r.time)}</span>
-            <span><i class="fa-solid fa-clock"></i> ${formatTime(r.time)}</span>
-            ${r.lat ? `<span><i class="fa-solid fa-location-dot"></i> ${r.lat.toFixed(4)}, ${r.lng.toFixed(4)}</span>` : ''}
-          </div>
-        </div>
-        <span class="log-type ${r.type}">${r.type === 'in' ? 'IN' : 'OUT'}</span>
-      </div>`).join('');
-  },
-
-  async _loadStats() {
-    if (!Auth.session) return;
-    const records = await API.getMyRecords(Auth.session.user.id);
-    const today = new Date().toDateString();
-    const weekStart = new Date(); weekStart.setDate(weekStart.getDate() - weekStart.getDay()); weekStart.setHours(0,0,0,0);
-    let todayN = 0, weekN = 0;
-    records.forEach(r => {
-      const d = new Date(r.time);
-      if (d.toDateString() === today) todayN++;
-      if (d >= weekStart) weekN++;
-    });
-    animateNum(document.getElementById('empStatToday'), todayN);
-    animateNum(document.getElementById('empStatWeek'), weekN);
-    animateNum(document.getElementById('empStatTotal'), records.length);
-  },
-
-  _startClock() {
-    if (this.clockInterval) clearInterval(this.clockInterval);
-    const tick = () => {
-      const n = new Date();
-      document.getElementById('clockTime').textContent =
-        [n.getHours(), n.getMinutes(), n.getSeconds()].map(v => String(v).padStart(2, '0')).join(':');
-      document.getElementById('clockDate').textContent =
-        n.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-    };
-    tick(); this.clockInterval = setInterval(tick, 1000);
-  },
-
-  async punch() {
-    if (!Auth.session || !this.capturedImage) {
-      if (!this.capturedImage) showToast('Please capture a selfie first', 'error');
-      return;
-    }
-    const btn = document.getElementById('btnPunch');
-    btn.disabled = true;
-
-    let loc = { lat: 0, lng: 0 };
-    try {
-      loc = await new Promise((res, rej) =>
-        navigator.geolocation.getCurrentPosition(p => res({ lat: p.coords.latitude, lng: p.coords.longitude }), rej, { enableHighAccuracy: true, timeout: 8000 })
-      );
-    } catch {
-      showToast('Location unavailable, continuing anyway', 'info');
-    }
-
-    const locEl = document.getElementById('locationInfo');
-    locEl.classList.remove('hidden');
-    document.getElementById('locationCoords').textContent =
-      loc.lat ? `${loc.lat.toFixed(6)}, ${loc.lng.toFixed(6)}` : 'Location unavailable';
-
-    try {
-      const isIn = this.punchState === 'idle';
-      await (isIn ? API.punchIn : API.punchOut)(Auth.session.user.id, this.capturedImage, loc.lat, loc.lng);
-
-      if (isIn) {
-        this.punchState = 'punched-in';
-        btn.className = 'btn btn-punch-out';
-        document.getElementById('btnPunchText').textContent = 'Punch Out';
-        btn.querySelector('i').className = 'fa-solid fa-right-from-bracket';
-        document.getElementById('statusBadge').className = 'status-badge active';
-        document.getElementById('statusText').textContent = 'Clocked In';
-        showToast('Punched in successfully', 'success');
-      } else {
-        this.punchState = 'idle';
-        btn.className = 'btn btn-punch-in';
-        document.getElementById('btnPunchText').textContent = 'Punch In';
-        btn.querySelector('i').className = 'fa-solid fa-right-to-bracket';
-        document.getElementById('statusBadge').className = 'status-badge out';
-        document.getElementById('statusText').textContent = 'Clocked Out';
-        showToast('Punched out successfully', 'info');
-        setTimeout(() => {
-          this.capturedImage = null;
-          document.getElementById('selfiePreview').classList.add('hidden');
-          document.getElementById('camPlaceholder').classList.remove('hidden');
-          document.getElementById('camFrame').classList.remove('active');
-          document.getElementById('statusBadge').className = 'status-badge idle';
-          document.getElementById('statusText').textContent = 'Idle';
-          locEl.classList.add('hidden');
-        }, 1500);
-      }
-      this._loadRecords();
-      this._loadStats();
-    } catch (e) {
-      showToast(e.message, 'error');
-    }
-    btn.disabled = false;
-  }
-};
-
-/* ============================================================
-   ADMIN CONTROLLER
-   ============================================================ */
-const AdminCtrl = {
-  barChart: null,
-  doughnutChart: null,
-  cachedRecords: [],
-
-  init() {
-    if (!Auth.session) return;
-    document.getElementById('admUserName').textContent = Auth.session.user.name;
-    this._loadStats();
-    this._loadCharts();
-    this.applyFilters();
-  },
-
-  async _loadStats() {
-    const s = await API.getStats();
-    document.getElementById('adminStats').innerHTML = `
-      <div class="admin-stat">
-        <div class="stat-icon amber"><i class="fa-solid fa-fingerprint"></i></div>
-        <div class="stat-val" data-target="${s.total}">0</div>
-        <div class="stat-lbl">Total Punches</div>
-      </div>
-      <div class="admin-stat">
-        <div class="stat-icon green"><i class="fa-solid fa-calendar-check"></i></div>
-        <div class="stat-val" data-target="${s.today}">0</div>
-        <div class="stat-lbl">Today's Activity</div>
-      </div>
-      <div class="admin-stat">
-        <div class="stat-icon blue"><i class="fa-solid fa-users"></i></div>
-        <div class="stat-val" data-target="${s.employees}">0</div>
-        <div class="stat-lbl">Employees</div>
-      </div>
-      <div class="admin-stat">
-        <div class="stat-icon red"><i class="fa-solid fa-chart-line"></i></div>
-        <div class="stat-val" data-target="${s.week}">0</div>
-        <div class="stat-lbl">This Week</div>
-      </div>`;
-    // Animate numbers
-    document.querySelectorAll('.admin-stat .stat-val').forEach(el => {
-      animateNum(el, parseInt(el.dataset.target));
-    });
-  },
-
-  async _loadCharts() {
-    const daily = await API.getDailyPunches(7);
-    const stats = await API.getStats();
-
-    // Bar chart
-    if (this.barChart) this.barChart.destroy();
-    this.barChart = new Chart(document.getElementById('barChart'), {
-      type: 'bar',
-      data: {
-        labels: daily.map(d => d.label),
-        datasets: [
-          { label: 'Punch In', data: daily.map(d => d.ins), backgroundColor: 'rgba(52,211,153,0.7)', borderRadius: 6, borderSkipped: false },
-          { label: 'Punch Out', data: daily.map(d => d.outs), backgroundColor: 'rgba(248,113,113,0.7)', borderRadius: 6, borderSkipped: false }
-        ]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: true,
-        plugins: { legend: { labels: { color: '#94a3b8', font: { family: 'Space Grotesk', size: 12 } } } },
-        scales: {
-          x: { stacked: true, ticks: { color: '#64748b', font: { family: 'Space Grotesk', size: 11 } }, grid: { color: 'rgba(37,45,61,0.5)' } },
-          y: { stacked: true, beginAtZero: true, ticks: { color: '#64748b', stepSize: 1, font: { family: 'JetBrains Mono', size: 11 } }, grid: { color: 'rgba(37,45,61,0.5)' } }
-        }
-      }
-    });
-
-    // Doughnut chart
-    if (this.doughnutChart) this.doughnutChart.destroy();
-    this.doughnutChart = new Chart(document.getElementById('doughnutChart'), {
-      type: 'doughnut',
-      data: {
-        labels: ['Punch In', 'Punch Out'],
-        datasets: [{
-          data: [stats.todayIn, stats.todayOut],
-          backgroundColor: ['rgba(52,211,153,0.8)', 'rgba(248,113,113,0.8)'],
-          borderColor: ['rgba(52,211,153,1)', 'rgba(248,113,113,1)'],
-          borderWidth: 1, hoverOffset: 8
-        }]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: true, cutout: '65%',
-        plugins: {
-          legend: { position: 'bottom', labels: { color: '#94a3b8', padding: 16, font: { family: 'Space Grotesk', size: 12 } } }
-        }
-      }
-    });
-  },
-
-  async applyFilters() {
-    const filters = {
-      dateFrom: document.getElementById('filterFrom').value || undefined,
-      dateTo: document.getElementById('filterTo').value || undefined,
-      search: document.getElementById('filterSearch').value.trim() || undefined,
-      type: document.getElementById('filterType').value || undefined
-    };
-    this.cachedRecords = await API.getAllRecords(filters);
-    this._renderTable();
-  },
-
-  _renderTable() {
-    const wrap = document.getElementById('tableWrap');
-    if (this.cachedRecords.length === 0) {
-      wrap.innerHTML = '<div class="empty-state"><i class="fa-solid fa-inbox"></i><p>No records found</p></div>';
-      return;
-    }
-    let html = `<table class="data-table">
-      <thead><tr>
-        <th>Photo</th><th>Name</th><th>Type</th><th>Date</th><th>Time</th><th>Location</th><th></th>
-      </tr></thead><tbody>`;
-    this.cachedRecords.forEach(r => {
-      html += `<tr>
-        <td><img class="tbl-thumb" src="${r.photo}" alt="" loading="lazy"></td>
-        <td class="tbl-name">${escapeHtml(r.userName)}${r.userDept ? `<br><span style="font-size:11px;color:var(--fg-muted)">${r.userDept}</span>` : ''}</td>
-        <td class="tbl-type-${r.type}">${r.type === 'in' ? 'IN' : 'OUT'}</td>
-        <td>${formatDate(r.time)}</td>
-        <td style="font-family:'JetBrains Mono',monospace;font-size:12px">${formatTime(r.time)}</td>
-        <td class="tbl-coords">${r.lat ? `${r.lat.toFixed(4)}, ${r.lng.toFixed(4)}` : '—'}</td>
-        <td><button class="btn-view-photo" onclick="AdminCtrl.viewPhoto('${r.photo.replace(/'/g, "\\'")}')"><i class="fa-solid fa-expand"></i></button></td>
-      </tr>`;
-    });
-    html += '</tbody></table>';
-    wrap.innerHTML = html;
-  },
-
-  viewPhoto(src) {
-    document.getElementById('photoModalImg').src = src;
-    document.getElementById('photoModal').classList.add('open');
-  },
-
-  async addEmployee() {
-    const name = document.getElementById('newName').value.trim();
-    const username = document.getElementById('newUsername').value.trim();
-    const password = document.getElementById('newPassword').value;
-    const department = document.getElementById('newDept').value;
-
-    if (!name || !username || !password) {
-      showToast('Please fill in all fields', 'error'); return;
-    }
-    if (password.length < 4) {
-      showToast('Password must be at least 4 characters', 'error'); return;
-    }
-
-    try {
-      const avatar = generateAvatar(name);
-      await API.addUser({ name, username, password, role: 'employee', department, avatar, createdAt: new Date().toISOString() });
-      showToast(`Employee "${name}" added successfully`, 'success');
-      document.getElementById('newName').value = '';
-      document.getElementById('newUsername').value = '';
-      document.getElementById('newPassword').value = '';
-      this._loadStats(); // refresh employee count
-    } catch (e) {
-      showToast(e.message, 'error');
-    }
-  },
-
-  async exportCSV() {
-    if (this.cachedRecords.length === 0) { showToast('No records to export', 'info'); return; }
-    const header = 'Name,Department,Type,Date,Time,Latitude,Longitude\n';
-    const rows = this.cachedRecords.map(r =>
-      `"${r.userName}","${r.userDept}","${r.type}","${formatDate(r.time)}","${formatTime(r.time)}","${r.lat}","${r.lng}"`
-    ).join('\n');
-    this._download(header + rows, 'attendance_export.csv', 'text/csv');
-    showToast('CSV exported successfully', 'success');
-  },
-
-  async exportJSON() {
-    if (this.cachedRecords.length === 0) { showToast('No records to export', 'info'); return; }
-    const data = this.cachedRecords.map(r => ({
-      name: r.userName, department: r.userDept, type: r.type,
-      date: formatDate(r.time), time: formatTime(r.time),
-      timestamp: r.time, lat: r.lat, lng: r.lng
-    }));
-    this._download(JSON.stringify(data, null, 2), 'attendance_export.json', 'application/json');
-    showToast('JSON exported successfully', 'success');
-  },
-
-  _download(content, filename, mime) {
-    const blob = new Blob([content], { type: mime });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = filename; a.click();
-    URL.revokeObjectURL(url);
-  }
-};
-
-/* ============================================================
-   CAMERA MODAL
-   ============================================================ */
-async function openCameraModal() {
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } }
-    });
-    EmpCtrl.cameraStream = stream;
-    document.getElementById('modalVideo').srcObject = stream;
-    document.getElementById('cameraModal').classList.add('open');
-  } catch {
-    showToast('Camera access denied or unavailable', 'error');
-  }
-}
-
-function closeCameraModal() {
-  document.getElementById('cameraModal').classList.remove('open');
-  if (EmpCtrl.cameraStream) {
-    EmpCtrl.cameraStream.getTracks().forEach(t => t.stop());
-    EmpCtrl.cameraStream = null;
-  }
-  document.getElementById('modalVideo').srcObject = null;
-}
-
-function captureSelfie() {
-  if (!EmpCtrl.cameraStream) return;
-  const v = document.getElementById('modalVideo');
-  const c = document.getElementById('captureCanvas');
-  c.width = v.videoWidth; c.height = v.videoHeight;
-  const ctx = c.getContext('2d');
-  ctx.translate(v.videoWidth, 0); ctx.scale(-1, 1);
-  ctx.drawImage(v, 0, 0); ctx.setTransform(1, 0, 0, 1, 0, 0);
-
-  const dataUrl = c.toDataURL('image/jpeg', 0.8);
-  // Resize for storage efficiency
-  resizeImage(dataUrl, 320, 240).then(resized => {
-    EmpCtrl.capturedImage = resized;
-    document.getElementById('selfiePreview').src = resized;
-    document.getElementById('selfiePreview').classList.remove('hidden');
-    document.getElementById('camPlaceholder').classList.add('hidden');
-    document.getElementById('camFrame').classList.add('active');
-    closeCameraModal();
-    showToast('Selfie captured', 'success');
-  });
-}
-
-function closePhotoModal() {
-  document.getElementById('photoModal').classList.remove('open');
-}
-
-// Close modals on Escape / overlay click
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') {
-    if (document.getElementById('cameraModal').classList.contains('open')) closeCameraModal();
-    if (document.getElementById('photoModal').classList.contains('open')) closePhotoModal();
-  }
-});
-document.getElementById('cameraModal').addEventListener('click', e => { if (e.target.id === 'cameraModal') closeCameraModal(); });
-document.getElementById('photoModal').addEventListener('click', e => { if (e.target.id === 'photoModal') closePhotoModal(); });
-
-// Filter inputs: live search on typing, change on select/date
-document.getElementById('filterSearch').addEventListener('input', () => AdminCtrl.applyFilters());
-document.getElementById('filterType').addEventListener('change', () => AdminCtrl.applyFilters());
-document.getElementById('filterFrom').addEventListener('change', () => AdminCtrl.applyFilters());
-document.getElementById('filterTo').addEventListener('change', () => AdminCtrl.applyFilters());
-
-/* ============================================================
-   SEED DATA — Populate demo records on first run
-   ============================================================ */
-async function seedData() {
-  // Check if already seeded
-  const users = await DB.getAll('users');
-  if (users.length > 0) return;
-
-  // Create demo users
-  await DB.add('users', {
-    name: 'Admin User', username: 'admin', password: 'admin123',
-    role: 'admin', department: 'Management',
-    avatar: generateAvatar('Admin User'), createdAt: new Date().toISOString()
-  });
-  const johnId = await DB.add('users', {
-    name: 'John Smith', username: 'john', password: 'john123',
-    role: 'employee', department: 'Engineering',
-    avatar: generateAvatar('John Smith'), createdAt: new Date().toISOString()
-  });
-  const sarahId = await DB.add('users', {
-    name: 'Sarah Johnson', username: 'sarah', password: 'sarah123',
-    role: 'employee', department: 'Design',
-    avatar: generateAvatar('Sarah Johnson'), createdAt: new Date().toISOString()
-  });
-
-  // Generate 7 days of attendance for both employees
-  const johnAvatar = generateAvatar('John Smith');
-  const sarahAvatar = generateAvatar('Sarah Johnson');
-
-  for (let d = 6; d >= 0; d--) {
-    const date = new Date();
-    date.setDate(date.getDate() - d);
-    // Skip future times if d=0 and it's early
-    const baseHour = d === 0 ? Math.min(new Date().getHours() - 1, 8) : 8;
-
-    for (const [uid, avatar] of [[johnId, johnAvatar], [sarahId, sarahAvatar]]) {
-      // Punch in: random between 8:00-9:30
-      const inDate = new Date(date);
-      inDate.setHours(baseHour + Math.floor(Math.random() * 1.5), Math.floor(Math.random() * 60), Math.floor(Math.random() * 60));
-      if (inDate > new Date()) continue;
-
-      await DB.add('records', {
-        userId: uid, type: 'in', time: inDate.toISOString(),
-        photo: avatar,
-        lat: 40.7128 + (Math.random() - 0.5) * 0.01,
-        lng: -74.006 + (Math.random() - 0.5) * 0.01
-      });
-
-      // Punch out: random between 17:00-18:30 (only if not today or if it's past 17)
-      if (d < 1 || new Date().getHours() >= 17) {
-        const outDate = new Date(date);
-        outDate.setHours(17 + Math.floor(Math.random() * 1.5), Math.floor(Math.random() * 60), Math.floor(Math.random() * 60));
-        if (outDate > new Date()) continue;
-        await DB.add('records', {
-          userId: uid, type: 'out', time: outDate.toISOString(),
-          photo: avatar,
-          lat: 40.7128 + (Math.random() - 0.5) * 0.01,
-          lng: -74.006 + (Math.random() - 0.5) * 0.01
-        });
-      }
-    }
-  }
-}
-
-/* ============================================================
-   INIT
-   ============================================================ */
-(async function init() {
-  try {
-    await DB.init();
-    await seedData();
-    await Auth.restore();
-  } catch (e) {
-    console.error('Init error:', e);
-    showToast('Failed to initialize database', 'error');
-  }
-})();
-</script>
-</body>
-</html>
+const DB={db:null,
+  init(){return new Promise((ok,no)=>{const r=indexedDB.open('AttDB',2);
+    r.onupgradeneeded=e=>{const d=e.target.result;
+      if(!d.objectStoreNames.contains('users')){const s=d.createObject
